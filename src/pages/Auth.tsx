@@ -120,7 +120,7 @@ const Auth = () => {
                       placeholder="Seu nome"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                      className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-base"
                       required={!isLogin}
                       maxLength={50}
                     />
@@ -138,7 +138,7 @@ const Auth = () => {
                     placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                    className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-base"
                     required
                   />
                 </div>
@@ -154,7 +154,7 @@ const Auth = () => {
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="pl-10 pr-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                    className="pl-10 pr-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-base"
                     required
                     minLength={6}
                   />
