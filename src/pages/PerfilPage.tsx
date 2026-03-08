@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle } from "lucide-react";
+import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
 import {
@@ -16,6 +16,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const GOAL_LABELS: Record<string, string> = {
   economizar: "Economizar dinheiro",
@@ -62,6 +68,11 @@ const PerfilPage = () => {
   const [profileData, setProfileData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Goal modal
+  const [goalModalOpen, setGoalModalOpen] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+  const [savingGoal, setSavingGoal] = useState(false);
+
   // Inline editing
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [editValue, setEditValue] = useState("");
@@ -75,7 +86,7 @@ const PerfilPage = () => {
     setLoading(true);
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target, current_balance")
+      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target, current_balance, goal_amount")
       .eq("user_id", user!.id)
       .maybeSingle();
 
@@ -154,6 +165,33 @@ const PerfilPage = () => {
     }
   };
 
+  const handleGoalCurrencyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value.replace(/\D/g, "");
+    if (raw.length <= 12) {
+      setGoalInput(raw ? formatCurrencyInput(raw) : "");
+    }
+  };
+
+  const saveGoal = async () => {
+    setSavingGoal(true);
+    try {
+      const amount = parseCurrency(goalInput);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ goal_amount: amount })
+        .eq("user_id", user!.id);
+      if (error) throw error;
+      toast.success("Meta definida com sucesso!");
+      setGoalModalOpen(false);
+      setGoalInput("");
+      fetchProfile();
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao salvar meta");
+    } finally {
+      setSavingGoal(false);
+    }
+  };
+
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -190,6 +228,11 @@ const PerfilPage = () => {
   if (!formCompleted || editingForm) {
     return <ProfileForm userId={user!.id} onComplete={fetchProfile} />;
   }
+
+  // Goal progress
+  const goalAmount = profileData?.goal_amount ?? 0;
+  const currentBalance = profileData?.current_balance ?? 0;
+  const goalProgress = goalAmount > 0 ? Math.min(Math.max(currentBalance / goalAmount, 0), 1) : 0;
 
   const renderFieldCard = (
     field: EditableField,
@@ -307,13 +350,78 @@ const PerfilPage = () => {
         <p className="text-xs text-muted-foreground">{user?.email}</p>
       </div>
 
+      {/* Goal Progress Section */}
+      <div className="w-full max-w-xs">
+        <div className="relative overflow-hidden rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 via-primary/10 to-accent/10 p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                <Trophy className="w-4 h-4 text-primary" />
+              </div>
+              <span className="text-sm font-heading font-bold text-foreground">Minha Meta</span>
+            </div>
+            {goalAmount > 0 && (
+              <span className="text-xs font-semibold text-primary">{formatBRL(goalAmount)}</span>
+            )}
+          </div>
+
+          {goalAmount > 0 ? (
+            <div className="space-y-2">
+              <div className="flex justify-between items-end">
+                <span className="text-xs text-muted-foreground">Saldo atual</span>
+                <span className="text-sm font-bold text-foreground">{formatBRL(currentBalance)}</span>
+              </div>
+              {/* Progress bar */}
+              <div className="relative h-4 rounded-full bg-secondary/80 border border-border overflow-hidden">
+                <div
+                  className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
+                  style={{
+                    width: `${goalProgress * 100}%`,
+                    background: "linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)))",
+                    boxShadow: "0 0 12px hsl(var(--primary) / 0.5), 0 0 24px hsl(var(--primary) / 0.2)",
+                  }}
+                />
+                {/* Glow dot at the end */}
+                {goalProgress > 0.03 && (
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary-foreground border-2 border-primary"
+                    style={{
+                      left: `calc(${goalProgress * 100}% - 6px)`,
+                      boxShadow: "0 0 8px hsl(var(--primary) / 0.8)",
+                    }}
+                  />
+                )}
+              </div>
+              <button
+                onClick={() => {
+                  setGoalInput(goalAmount ? formatBRL(goalAmount) : "");
+                  setGoalModalOpen(true);
+                }}
+                className="w-full py-2 rounded-lg border border-primary/30 text-xs font-semibold text-primary hover:bg-primary/10 transition-colors"
+              >
+                Alterar meta
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                setGoalInput("");
+                setGoalModalOpen(true);
+              }}
+              className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 neon-glow transition-all"
+            >
+              Definir Meta
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Financial info */}
       {profileData && (
         <div className="w-full max-w-xs space-y-3">
           <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
           <div className="space-y-2">
             {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", formatBRL(profileData.current_balance), true)}
-            
             {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", formatBRL(profileData.salary_amount))}
             {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", formatBRL(profileData.fixed_expenses))}
             {renderFieldCard("financial_goal", <Target className="w-4 h-4 text-primary" />, "Objetivo financeiro", GOAL_LABELS[profileData.financial_goal] || profileData.financial_goal || "—")}
@@ -334,6 +442,7 @@ const PerfilPage = () => {
         </Button>
       </div>
 
+      {/* Balance confirm dialog */}
       <AlertDialog open={balanceConfirmOpen} onOpenChange={setBalanceConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -356,6 +465,39 @@ const PerfilPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Goal modal */}
+      <Dialog open={goalModalOpen} onOpenChange={setGoalModalOpen}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-primary" />
+              Definir Meta
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <p className="text-xs text-muted-foreground">
+              Qual valor você quer alcançar? A barra de progresso vai acompanhar seu saldo até lá.
+            </p>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={goalInput}
+              onChange={handleGoalCurrencyChange}
+              className="h-10 bg-secondary border-border focus:border-primary text-sm"
+              autoFocus
+            />
+            <Button
+              onClick={saveGoal}
+              disabled={savingGoal || !goalInput}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold"
+            >
+              {savingGoal ? "Salvando..." : "Salvar Meta"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
