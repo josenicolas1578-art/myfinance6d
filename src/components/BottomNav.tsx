@@ -1,5 +1,7 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { MessageCircle, BarChart3, FileText, UserCircle } from "lucide-react";
+import appIcon from "@/assets/app-icon.png";
+import { MessageCircle, BarChart3, FileText, UserCircle } from "lucide-react";
 
 const tabs = [
   { id: "chat", label: "Chat", icon: MessageCircle, path: "/dashboard/chat" },
