@@ -24,11 +24,48 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
+const MOTIVATIONAL_QUOTES = [
+  "Quem disse que o céu é o limite nunca viu sua determinação! 🚀",
+  "Cada centavo economizado é um passo rumo à liberdade financeira. Continue! 💪",
+  "Você provou que disciplina transforma sonhos em realidade. Agora, sonhe maior! ✨",
+  "O sucesso financeiro não é sorte, é consistência. E você tem de sobra! 🔥",
+  "Hoje você colhe o que plantou. Amanhã, plante ainda mais alto! 🌱",
+  "Grandes conquistas começam com pequenos hábitos. Você é a prova viva disso! 🏆",
+  "Seu eu do futuro agradece cada decisão que você tomou até aqui. Continue! 💎",
+  "Dinheiro é ferramenta, disciplina é poder. Você dominou os dois! ⚡",
+  "Não existe teto pra quem tem mentalidade de crescimento. Bora pra próxima! 🎯",
+  "A maioria desiste no meio do caminho. Você chegou até o fim. Isso é raro! 👑",
+  "Sua conta bancária é reflexo da sua mentalidade. E a sua é de campeão! 🏅",
+  "Poucos têm a coragem de definir metas e a disciplina de alcançá-las. Você é um deles! 💫",
+  "Enquanto muitos sonham, você age. Essa é a diferença. Próxima meta! 🎖️",
+  "Seu progresso é inspirador. Imagine onde você estará daqui a um ano! 📈",
+  "A jornada é longa, mas você provou que está preparado. Vamos mais alto! 🌟",
+];
+
+const getRandomMotivation = () => {
+  const usedKey = "myfinance_used_motivations";
+  let used: number[] = [];
+  try { used = JSON.parse(localStorage.getItem(usedKey) || "[]"); } catch {}
+  
+  // If all used, reset
+  if (used.length >= MOTIVATIONAL_QUOTES.length) {
+    used = [];
+  }
+  
+  const available = MOTIVATIONAL_QUOTES.map((_, i) => i).filter((i) => !used.includes(i));
+  const randomIdx = available[Math.floor(Math.random() * available.length)];
+  used.push(randomIdx);
+  localStorage.setItem(usedKey, JSON.stringify(used));
+  
+  return MOTIVATIONAL_QUOTES[randomIdx];
+};
+
 const GOAL_LABELS: Record<string, string> = {
   economizar: "Economizar dinheiro",
   sair_dividas: "Sair das dívidas",
   investir: "Começar a investir",
   organizar: "Organizar minhas finanças",
+};
 };
 
 const formatBRL = (value: number | null | undefined) => {
