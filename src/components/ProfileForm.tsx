@@ -93,7 +93,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
   return (
     <div className="flex flex-col items-center px-5 py-6 gap-5">
       {/* Header */}
-      <div className="flex items-center gap-2 text-amber-400">
+      <div className="flex items-center gap-2 text-destructive">
         <AlertTriangle className="w-5 h-5" />
         <span className="text-sm font-semibold font-heading">Formulário obrigatório</span>
       </div>
