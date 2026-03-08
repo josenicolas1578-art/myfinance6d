@@ -332,7 +332,7 @@ const ChatPage = () => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && send()}
             placeholder="Digite sua mensagem..."
-            className="flex-1 h-10 rounded-lg bg-secondary border border-border px-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
+            className="flex-1 h-10 rounded-lg bg-secondary border border-border px-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
             disabled={isLoading}
           />
           <button
