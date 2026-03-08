@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, DollarSign, TrendingUp, RotateCcw, Plus, Bot, Trash2 } from "lucide-react";
+import { X, Plus, Bot, Trash2, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -40,9 +40,7 @@ interface SideMenuProps {
 }
 
 const builtInTopics = [
-  { id: "gastos", label: "Gastos", icon: DollarSign, description: "Controle de despesas e gastos" },
-  { id: "investimentos", label: "Investimentos", icon: TrendingUp, description: "Dicas e análise de investimentos" },
-  { id: "retornos", label: "Retornos / Ganhos", icon: RotateCcw, description: "Acompanhamento de retornos e ganhos" },
+  { id: "geral", label: "Gestor Geral", icon: MessageCircle, description: "Gastos, investimentos e ganhos" },
 ];
 
 const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) => {
@@ -140,7 +138,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
       toast.success(`Gestor "${deleteAgent.name}" excluído`);
       // If active topic was this agent, switch to gastos
       if (activeTopic === `agent-${deleteAgent.id}`) {
-        onSelectTopic("gastos");
+        onSelectTopic("geral");
       }
       loadAgents();
     }

@@ -10,15 +10,11 @@ import type { ChatTopic } from "@/components/SideMenu";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const BUILT_IN_LABELS: Record<string, string> = {
-  gastos: "Gastos",
-  investimentos: "Investimentos",
-  retornos: "Retornos / Ganhos",
+  geral: "Gestor Geral",
 };
 
 const INITIAL_MESSAGES: Record<string, Msg[]> = {
-  gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
-  investimentos: [],
-  retornos: [],
+  geral: [{ role: "assistant", content: "Olá! Sou o seu assistente geral de gastos, investimentos e ganhos. Seja específico com as informações que você irá me passar. Como posso lhe ajudar?" }],
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -92,9 +88,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<string, Msg[]>>({
-    gastos: [...INITIAL_MESSAGES.gastos],
-    investimentos: [],
-    retornos: [],
+    geral: [...INITIAL_MESSAGES.geral],
   });
   const [loadedTopics, setLoadedTopics] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
@@ -233,7 +227,7 @@ const ChatPage = () => {
     try {
       await streamChat({
         messages: allMessages,
-        topic: isCustomAgent ? `custom:${topicLabel}` : chatTopic,
+        topic: isCustomAgent ? `custom:${topicLabel}` : "geral",
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);

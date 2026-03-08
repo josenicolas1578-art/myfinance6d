@@ -10,7 +10,7 @@ import { Menu, X, Instagram, Wallet } from "lucide-react";
 const DashboardLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
+  const [chatTopic, setChatTopic] = useState<ChatTopic>("geral");
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
