@@ -10,15 +10,11 @@ import type { ChatTopic } from "@/components/SideMenu";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const BUILT_IN_LABELS: Record<string, string> = {
-  gastos: "Gastos",
-  investimentos: "Investimentos",
-  retornos: "Retornos / Ganhos",
+  geral: "Gestor Geral",
 };
 
 const INITIAL_MESSAGES: Record<string, Msg[]> = {
-  gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
-  investimentos: [],
-  retornos: [],
+  geral: [{ role: "assistant", content: "Olá! Sou o seu assistente geral de gastos, investimentos e ganhos. Seja específico com as informações que você irá me passar. Como posso lhe ajudar?" }],
 };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
