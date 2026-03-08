@@ -550,25 +550,63 @@ const PerfilPage = () => {
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            <p className="text-xs text-muted-foreground">
-              Qual valor você quer alcançar? A barra de progresso vai acompanhar seu saldo até lá.
-            </p>
-            <Input
-              type="text"
-              inputMode="numeric"
-              placeholder="R$ 0,00"
-              value={goalInput}
-              onChange={handleGoalCurrencyChange}
-              className="h-10 bg-secondary border-border focus:border-primary text-sm"
-              autoFocus
-            />
-            <Button
-              onClick={saveGoal}
-              disabled={savingGoal || !goalInput}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold"
-            >
-              {savingGoal ? "Salvando..." : "Salvar Meta"}
-            </Button>
+            {currentBalance < 5000 ? (
+              <>
+                <p className="text-xs text-muted-foreground">
+                  Digite o valor da meta que você deseja alcançar.
+                </p>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="R$ 0,00"
+                  value={goalInput}
+                  onChange={handleGoalCurrencyChange}
+                  className="h-10 bg-secondary border-border focus:border-primary text-sm"
+                  autoFocus
+                />
+                <Button
+                  onClick={saveGoal}
+                  disabled={savingGoal || !goalInput}
+                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold"
+                >
+                  {savingGoal ? "Salvando..." : "Salvar Meta"}
+                </Button>
+              </>
+            ) : (() => {
+              const step = currentBalance >= 10000 ? 5000 : 1000;
+              const base = Math.ceil(currentBalance / step) * step;
+              const options = Array.from({ length: 4 }, (_, i) => base + step * (i + 1));
+              return (
+                <>
+                  <p className="text-xs text-muted-foreground">
+                    Escolha sua próxima meta. Seu saldo atual é{" "}
+                    <span className="text-primary font-semibold">{formatBRL(currentBalance)}</span>.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {options.map((val) => (
+                      <button
+                        key={val}
+                        onClick={() => setGoalInput(formatBRL(val))}
+                        className={`py-3 rounded-lg border text-sm font-semibold transition-all ${
+                          parseCurrency(goalInput) === val
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border bg-secondary text-foreground hover:border-primary/40"
+                        }`}
+                      >
+                        {formatBRL(val)}
+                      </button>
+                    ))}
+                  </div>
+                  <Button
+                    onClick={saveGoal}
+                    disabled={savingGoal || !goalInput}
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold"
+                  >
+                    {savingGoal ? "Salvando..." : "Salvar Meta"}
+                  </Button>
+                </>
+              );
+            })()}
           </div>
         </DialogContent>
       </Dialog>
