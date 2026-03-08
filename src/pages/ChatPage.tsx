@@ -264,7 +264,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100dvh-56px)] lg:h-[calc(100dvh-56px)]">
+    <div className="flex flex-col h-full pb-16 lg:pb-0">
       {/* Topic banner */}
       <div className="px-4 py-2 bg-secondary/50 border-b border-border text-center">
         <p className="text-xs text-muted-foreground">
