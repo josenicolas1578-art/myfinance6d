@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
-import { Send } from "lucide-react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import type { ChatTopic } from "@/components/SideMenu";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -78,6 +80,9 @@ async function streamChat({
 
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<ChatTopic, Msg[]>>({
     gastos: [],
     investimentos: [],
@@ -89,6 +94,17 @@ const ChatPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const messages = conversations[chatTopic];
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("form_completed")
+        .eq("user_id", user.id)
+        .maybeSingle()
+        .then(({ data }) => setFormCompleted(data?.form_completed ?? false));
+    }
+  }, [user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -141,6 +157,28 @@ const ChatPage = () => {
       setIsLoading(false);
     }
   };
+
+  if (formCompleted === false) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 px-6 text-center" style={{ height: "calc(100dvh - 56px - 64px)" }}>
+        <div className="w-14 h-14 rounded-full bg-destructive/10 border border-destructive/30 flex items-center justify-center">
+          <AlertTriangle className="w-7 h-7 text-destructive" />
+        </div>
+        <div className="space-y-2">
+          <h2 className="text-lg font-heading font-bold text-foreground">Formulário obrigatório</h2>
+          <p className="text-sm text-muted-foreground">
+            Você precisa responder o formulário na aba <span className="text-primary font-semibold">Perfil</span> antes de usar o chat.
+          </p>
+        </div>
+        <button
+          onClick={() => navigate("/dashboard/perfil")}
+          className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 neon-glow transition-all"
+        >
+          Ir para o Perfil
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col" style={{ height: "calc(100dvh - 56px - 64px)" }}>

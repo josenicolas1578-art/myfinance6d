@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Target, Sparkles, ArrowRight } from "lucide-react";
+import { MessageCircle, Target, Sparkles, ArrowRight, AlertTriangle } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
 interface OnboardingTutorialProps {
@@ -27,6 +27,11 @@ const steps = [
     icon: Sparkles,
     title: "Tudo personalizado",
     description: "Preencha seu perfil financeiro e receba orientações feitas sob medida pra sua realidade.",
+  },
+  {
+    icon: AlertTriangle,
+    title: "⚠️ Formulário obrigatório!",
+    description: "Antes de usar o app, você PRECISA preencher o formulário na aba Perfil. Sem ele, o chat e as outras funções ficam bloqueados. É rápido e essencial!",
   },
 ];
 
