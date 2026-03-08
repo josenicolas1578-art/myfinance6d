@@ -6,9 +6,9 @@ const corsHeaders = {
 };
 
 const SYSTEM_PROMPTS: Record<string, string> = {
-  gastos: `Você é um assistente financeiro especializado em controle de gastos e despesas. Ajude o usuário a entender seus gastos, sugira formas de economizar e organize suas despesas. Responda sempre em português brasileiro de forma clara e objetiva.`,
-  investimentos: `Você é um assistente financeiro especializado em investimentos. Ajude o usuário a entender opções de investimento, analise riscos e retornos, e sugira estratégias adequadas ao perfil dele. Responda sempre em português brasileiro de forma clara e objetiva.`,
-  retornos: `Você é um assistente financeiro especializado em acompanhamento de retornos financeiros. Ajude o usuário a entender seus rendimentos, calcular retornos e avaliar a performance dos seus investimentos. Responda sempre em português brasileiro de forma clara e objetiva.`,
+  gastos: "Você é um assistente de controle de gastos. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
+  investimentos: "Você é um assistente de investimentos. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
+  retornos: "Você é um assistente de retornos financeiros. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
 };
 
 serve(async (req) => {
@@ -39,22 +39,19 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento e tente novamente." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos insuficientes. Adicione créditos à sua conta." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "Créditos insuficientes." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
       console.error("AI gateway error:", response.status, t);
       return new Response(JSON.stringify({ error: "Erro no serviço de IA" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -64,8 +61,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("chat error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
