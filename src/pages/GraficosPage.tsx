@@ -209,11 +209,7 @@ const GraficosPage = () => {
   // Get detail transactions for the selected category
   const detailTransactions = useMemo(() => {
     if (!detailCategory) return [];
-    if (detailCategory === "gastos") {
-      return transactions.filter((t) => t.category === "gastos" || t.category === "investimentos");
-    }
     if (detailCategory === "geral") {
-      // Show all unique transactions (don't double-count)
       return transactions;
     }
     return transactions.filter((t) => t.category === detailCategory);
