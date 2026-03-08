@@ -4,10 +4,12 @@ import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
+import { useAuth } from "@/contexts/AuthContext";
 import logoImg from "@/assets/logo.png";
 import { Menu, X, Instagram, Wallet } from "lucide-react";
 
 const DashboardLayout = () => {
+  const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [chatTopic, setChatTopic] = useState<ChatTopic>("geral");
@@ -17,12 +19,14 @@ const DashboardLayout = () => {
   const isChatPage = location.pathname === "/dashboard/chat";
 
   useEffect(() => {
-    const seen = localStorage.getItem("myfinance_tutorial_done");
+    if (!user) return;
+    const key = `myfinance_tutorial_done_${user.id}`;
+    const seen = localStorage.getItem(key);
     if (!seen) setShowTutorial(true);
-  }, []);
+  }, [user]);
 
   const completeTutorial = () => {
-    localStorage.setItem("myfinance_tutorial_done", "true");
+    if (user) localStorage.setItem(`myfinance_tutorial_done_${user.id}`, "true");
     setShowTutorial(false);
     navigate("/dashboard/chat");
   };
