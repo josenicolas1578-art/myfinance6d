@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { useOutletContext } from "react-router-dom";
-import { Send } from "lucide-react";
+import { useOutletContext, useNavigate } from "react-router-dom";
+import { Send, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import type { ChatTopic } from "@/components/SideMenu";
 
 type Msg = { role: "user" | "assistant"; content: string };
