@@ -28,6 +28,11 @@ const steps = [
     title: "Tudo personalizado",
     description: "Preencha seu perfil financeiro e receba orientações feitas sob medida pra sua realidade.",
   },
+  {
+    icon: AlertTriangle,
+    title: "⚠️ Formulário obrigatório!",
+    description: "Antes de usar o app, você PRECISA preencher o formulário na aba Perfil. Sem ele, o chat e as outras funções ficam bloqueados. É rápido e essencial!",
+  },
 ];
 
 const OnboardingTutorial = ({ onComplete }: OnboardingTutorialProps) => {
