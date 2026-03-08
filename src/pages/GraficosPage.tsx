@@ -184,6 +184,40 @@ const GraficosPage = () => {
     return result;
   }, [transactions]);
 
+  const generalChartData = useMemo(() => {
+    const now = new Date();
+    const dateMap: Record<string, { gains: number; expenses: number }> = {};
+
+    if (period === "hoje") {
+      const key = now.toISOString().split("T")[0];
+      dateMap[key] = { gains: 0, expenses: 0 };
+    } else {
+      const start = period === "7dias"
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
+        : new Date(now.getFullYear(), now.getMonth(), 1);
+      for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
+        dateMap[d.toISOString().split("T")[0]] = { gains: 0, expenses: 0 };
+      }
+    }
+
+    transactions.forEach((t) => {
+      const key = t.transaction_date;
+      if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0 };
+      if (t.category === "retornos") {
+        dateMap[key].gains += Number(t.amount);
+      } else {
+        dateMap[key].expenses += Number(t.amount);
+      }
+    });
+
+    return Object.entries(dateMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, { gains, expenses }]) => ({
+        date: date.slice(5).replace("-", "/"),
+        net: gains - expenses,
+      }));
+  }, [transactions, period]);
+
   return (
     <div className="flex flex-col gap-5 px-4 py-5 max-w-lg mx-auto">
       {/* Period selector */}
