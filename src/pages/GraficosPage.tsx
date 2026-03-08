@@ -503,6 +503,51 @@ const GraficosPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Transaction detail overlay */}
+      {detailCategory && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailCategory(null)} />
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-t-2xl max-h-[70vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <h3 className="text-sm font-heading font-semibold text-foreground">
+                {detailCategory === "geral" ? "Relatório Geral" :
+                 detailCategory === "gastos" ? "Detalhes dos Gastos" :
+                 detailCategory === "investimentos" ? "Detalhes dos Investimentos" :
+                 "Detalhes dos Retornos"}
+              </h3>
+              <button onClick={() => setDetailCategory(null)} className="p-1 rounded-md hover:bg-secondary">
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-4 space-y-2">
+              {detailTransactions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Nenhuma transação no período</p>
+              ) : (
+                detailTransactions.map((t, i) => {
+                  const label = detailCategory === "geral"
+                    ? (t.category === "retornos" ? "Ganhou" : t.category === "investimentos" ? "Investiu" : "Gastou")
+                    : detailCategory === "investimentos" ? "Investiu"
+                    : detailCategory === "retornos" ? "Ganhou"
+                    : (t.category === "investimentos" ? "Investiu/Gastou" : "Gastou");
+                  const color = t.category === "retornos" ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]";
+                  return (
+                    <div key={i} className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-secondary/50 border border-border/50">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-foreground">{label} {t.description || "Sem descrição"}</span>
+                        <span className="text-xs text-muted-foreground">{t.transaction_date.slice(5).replace("-", "/")}</span>
+                      </div>
+                      <span className={`text-sm font-semibold ${color}`}>
+                        {formatBRL(Number(t.amount))}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
