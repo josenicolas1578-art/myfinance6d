@@ -152,6 +152,16 @@ const PerfilPage = () => {
           <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
 
           <div className="space-y-2">
+            {profileData.current_balance != null && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/10 border border-primary/30">
+                <DollarSign className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Saldo atual na conta</p>
+                  <p className="text-base font-bold text-primary">{formatBRL(profileData.current_balance)}</p>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
               <Wallet className="w-4 h-4 text-primary shrink-0" />
               <div className="flex-1 min-w-0">
@@ -199,15 +209,6 @@ const PerfilPage = () => {
                 </div>
               </div>
             )}
-
-            {profileData.current_balance != null && (
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
-                <DollarSign className="w-4 h-4 text-primary shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground">Saldo atual na conta</p>
-                  <p className="text-sm font-medium text-foreground">{formatBRL(profileData.current_balance)}</p>
-                </div>
-              </div>
             )}
           </div>
         </div>
