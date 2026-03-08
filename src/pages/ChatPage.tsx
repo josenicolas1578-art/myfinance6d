@@ -169,8 +169,7 @@ const ChatPage = () => {
     });
   };
 
-  const extractTransactions = async (userMsg: string, aiMsg: string, topic: string) => {
-    // Extract for built-in financial topics and custom agents
+  const extractTransactions = async (userMsg: string, aiMsg: string) => {
     try {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
@@ -180,7 +179,7 @@ const ChatPage = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ userMessage: userMsg, assistantMessage: aiMsg, topic }),
+        body: JSON.stringify({ userMessage: userMsg, assistantMessage: aiMsg }),
       });
     } catch (e) {
       console.error("extract error:", e);
