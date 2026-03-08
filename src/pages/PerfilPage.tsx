@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy } from "lucide-react";
+import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy, Sparkles, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
 import {
@@ -23,6 +23,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+const MOTIVATIONAL_QUOTES = [
+  "Quem disse que o céu é o limite nunca viu sua determinação! 🚀",
+  "Cada centavo economizado é um passo rumo à liberdade financeira. Continue! 💪",
+  "Você provou que disciplina transforma sonhos em realidade. Agora, sonhe maior! ✨",
+  "O sucesso financeiro não é sorte, é consistência. E você tem de sobra! 🔥",
+  "Hoje você colhe o que plantou. Amanhã, plante ainda mais alto! 🌱",
+  "Grandes conquistas começam com pequenos hábitos. Você é a prova viva disso! 🏆",
+  "Seu eu do futuro agradece cada decisão que você tomou até aqui. Continue! 💎",
+  "Dinheiro é ferramenta, disciplina é poder. Você dominou os dois! ⚡",
+  "Não existe teto pra quem tem mentalidade de crescimento. Bora pra próxima! 🎯",
+  "A maioria desiste no meio do caminho. Você chegou até o fim. Isso é raro! 👑",
+  "Sua conta bancária é reflexo da sua mentalidade. E a sua é de campeão! 🏅",
+  "Poucos têm a coragem de definir metas e a disciplina de alcançá-las. Você é um deles! 💫",
+  "Enquanto muitos sonham, você age. Essa é a diferença. Próxima meta! 🎖️",
+  "Seu progresso é inspirador. Imagine onde você estará daqui a um ano! 📈",
+  "A jornada é longa, mas você provou que está preparado. Vamos mais alto! 🌟",
+];
+
+const getRandomMotivation = () => {
+  const usedKey = "myfinance_used_motivations";
+  let used: number[] = [];
+  try { used = JSON.parse(localStorage.getItem(usedKey) || "[]"); } catch {}
+  
+  // If all used, reset
+  if (used.length >= MOTIVATIONAL_QUOTES.length) {
+    used = [];
+  }
+  
+  const available = MOTIVATIONAL_QUOTES.map((_, i) => i).filter((i) => !used.includes(i));
+  const randomIdx = available[Math.floor(Math.random() * available.length)];
+  used.push(randomIdx);
+  localStorage.setItem(usedKey, JSON.stringify(used));
+  
+  return MOTIVATIONAL_QUOTES[randomIdx];
+};
 
 const GOAL_LABELS: Record<string, string> = {
   economizar: "Economizar dinheiro",
@@ -73,6 +109,8 @@ const PerfilPage = () => {
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [goalInput, setGoalInput] = useState("");
   const [savingGoal, setSavingGoal] = useState(false);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
 
   // Inline editing
   const [editingField, setEditingField] = useState<EditableField>(null);
@@ -82,6 +120,21 @@ const PerfilPage = () => {
   useEffect(() => {
     if (user) fetchProfile();
   }, [user]);
+
+  // Detect goal achievement
+  useEffect(() => {
+    if (!profileData || !user) return;
+    const goal = profileData.goal_amount ?? 0;
+    const balance = profileData.current_balance ?? 0;
+    if (goal > 0 && balance >= goal) {
+      const celebratedKey = `myfinance_celebrated_${user.id}_${goal}`;
+      if (!localStorage.getItem(celebratedKey)) {
+        localStorage.setItem(celebratedKey, "true");
+        setCelebrationMsg(getRandomMotivation());
+        setCelebrationOpen(true);
+      }
+    }
+  }, [profileData, user]);
 
   const fetchProfile = async () => {
     setLoading(true);
@@ -515,6 +568,58 @@ const PerfilPage = () => {
               className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold"
             >
               {savingGoal ? "Salvando..." : "Salvar Meta"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Goal celebration dialog */}
+      <Dialog open={celebrationOpen} onOpenChange={setCelebrationOpen}>
+        <DialogContent className="max-w-xs border-primary/40 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="relative flex flex-col items-center text-center gap-5 py-4">
+            {/* Animated icon */}
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center neon-glow animate-scale-in">
+                <PartyPopper className="w-10 h-10 text-primary" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent flex items-center justify-center animate-bounce">
+                <Sparkles className="w-3.5 h-3.5 text-accent-foreground" />
+              </div>
+            </div>
+
+            <div className="space-y-2 animate-fade-in">
+              <h2 className="text-xl font-heading font-black text-foreground">
+                🎉 Parabéns!
+              </h2>
+              <p className="text-sm text-foreground font-medium">
+                Você atingiu sua meta de{" "}
+                <span className="text-primary font-bold neon-text">
+                  {formatBRL(profileData?.goal_amount)}
+                </span>
+              </p>
+            </div>
+
+            <div className="px-3 py-3 rounded-xl bg-secondary/60 border border-border animate-fade-in">
+              <p className="text-sm text-muted-foreground leading-relaxed italic">
+                "{celebrationMsg}"
+              </p>
+            </div>
+
+            <p className="text-xs text-muted-foreground animate-fade-in">
+              Vamos sonhar mais alto? Defina uma nova meta!
+            </p>
+
+            <Button
+              onClick={() => {
+                setCelebrationOpen(false);
+                setGoalInput("");
+                setGoalModalOpen(true);
+              }}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-bold text-sm animate-fade-in"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Definir Nova Meta
             </Button>
           </div>
         </DialogContent>
