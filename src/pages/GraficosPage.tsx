@@ -100,7 +100,7 @@ const GraficosPage = () => {
 
     const { data } = await supabase
       .from("transactions")
-      .select("amount, transaction_date, category")
+      .select("amount, transaction_date, category, description")
       .eq("user_id", user!.id)
       .gte("transaction_date", startDate)
       .order("transaction_date", { ascending: true });
