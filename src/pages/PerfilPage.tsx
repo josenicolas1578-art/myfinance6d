@@ -66,7 +66,6 @@ const GOAL_LABELS: Record<string, string> = {
   investir: "Começar a investir",
   organizar: "Organizar minhas finanças",
 };
-};
 
 const formatBRL = (value: number | null | undefined) => {
   if (value == null) return "—";
