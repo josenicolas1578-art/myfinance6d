@@ -47,7 +47,7 @@ const DashboardLayout = () => {
       <BottomNav onAboutClick={() => setAboutOpen(true)} />
 
       {/* Main content area - offset on desktop for sidebar */}
-      <div className="flex flex-col flex-1 min-h-[100dvh] lg:ml-56">
+      <div className={`flex flex-col flex-1 lg:ml-56 ${isChatPage ? 'h-[100dvh] overflow-hidden' : 'min-h-[100dvh]'}`}>
         {/* Header */}
         <header className="border-b border-border bg-card px-4" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           <div className="flex items-center justify-between h-14 w-full">
