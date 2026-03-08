@@ -9,13 +9,13 @@ import type { ChatTopic } from "@/components/SideMenu";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const TOPIC_LABELS: Record<ChatTopic, string> = {
+const BUILT_IN_LABELS: Record<string, string> = {
   gastos: "Gastos",
   investimentos: "Investimentos",
-  retornos: "Retornos",
+  retornos: "Retornos / Ganhos",
 };
 
-const INITIAL_MESSAGES: Record<ChatTopic, Msg[]> = {
+const INITIAL_MESSAGES: Record<string, Msg[]> = {
   gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
   investimentos: [],
   retornos: [],
@@ -30,7 +30,7 @@ async function streamChat({
   onDone,
 }: {
   messages: Msg[];
-  topic: ChatTopic;
+  topic: string;
   onDelta: (text: string) => void;
   onDone: () => void;
 }) {
@@ -91,18 +91,37 @@ const ChatPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
-  const [conversations, setConversations] = useState<Record<ChatTopic, Msg[]>>({
+  const [conversations, setConversations] = useState<Record<string, Msg[]>>({
     gastos: [...INITIAL_MESSAGES.gastos],
     investimentos: [],
     retornos: [],
   });
-  const [loadedTopics, setLoadedTopics] = useState<Set<ChatTopic>>(new Set());
+  const [loadedTopics, setLoadedTopics] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [topicLabel, setTopicLabel] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const messages = conversations[chatTopic];
+  const isCustomAgent = chatTopic.startsWith("agent-");
+  const messages = conversations[chatTopic] || [];
+
+  // Resolve topic label
+  useEffect(() => {
+    if (BUILT_IN_LABELS[chatTopic]) {
+      setTopicLabel(BUILT_IN_LABELS[chatTopic]);
+    } else if (isCustomAgent) {
+      const agentId = chatTopic.replace("agent-", "");
+      supabase
+        .from("custom_agents")
+        .select("name, description")
+        .eq("id", agentId)
+        .maybeSingle()
+        .then(({ data }) => {
+          setTopicLabel((data as any)?.name || "Gestor");
+        });
+    }
+  }, [chatTopic]);
 
   // Load messages from DB for current topic
   useEffect(() => {
@@ -119,9 +138,11 @@ const ChatPage = () => {
       if (data && data.length > 0) {
         const msgs = data.map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content }));
         setConversations((prev) => ({ ...prev, [chatTopic]: msgs }));
-      } else {
-        // Use initial messages if no history
+      } else if (INITIAL_MESSAGES[chatTopic]) {
         setConversations((prev) => ({ ...prev, [chatTopic]: [...INITIAL_MESSAGES[chatTopic]] }));
+      } else {
+        // Custom agent - empty start
+        setConversations((prev) => ({ ...prev, [chatTopic]: [] }));
       }
       setLoadedTopics((prev) => new Set(prev).add(chatTopic));
     };
@@ -144,7 +165,7 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const saveMessage = async (topic: ChatTopic, role: string, content: string) => {
+  const saveMessage = async (topic: string, role: string, content: string) => {
     if (!user) return;
     await supabase.from("chat_messages").insert({
       user_id: user.id,
@@ -154,7 +175,9 @@ const ChatPage = () => {
     });
   };
 
-  const extractTransactions = async (userMsg: string, aiMsg: string, topic: ChatTopic) => {
+  const extractTransactions = async (userMsg: string, aiMsg: string, topic: string) => {
+    // Only extract for built-in financial topics
+    if (!["gastos", "investimentos", "retornos"].includes(topic)) return;
     try {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
@@ -178,12 +201,11 @@ const ChatPage = () => {
     const userMsg: Msg = { role: "user", content: text };
     setConversations((prev) => ({
       ...prev,
-      [chatTopic]: [...prev[chatTopic], userMsg],
+      [chatTopic]: [...(prev[chatTopic] || []), userMsg],
     }));
     setInput("");
     setIsLoading(true);
 
-    // Save user message to DB
     saveMessage(chatTopic, "user", text);
 
     let assistantSoFar = "";
@@ -192,7 +214,7 @@ const ChatPage = () => {
     const upsertAssistant = (chunk: string) => {
       assistantSoFar += chunk;
       setConversations((prev) => {
-        const topicMsgs = prev[chatTopic];
+        const topicMsgs = prev[chatTopic] || [];
         const last = topicMsgs[topicMsgs.length - 1];
         if (last?.role === "assistant") {
           return {
@@ -212,13 +234,11 @@ const ChatPage = () => {
     try {
       await streamChat({
         messages: allMessages,
-        topic: chatTopic,
+        topic: isCustomAgent ? `custom:${topicLabel}` : chatTopic,
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);
-          // Save assistant message to DB
           saveMessage(chatTopic, "assistant", assistantSoFar);
-          // Extract transactions in background
           extractTransactions(text, assistantSoFar, chatTopic);
         },
       });
@@ -256,7 +276,7 @@ const ChatPage = () => {
       <div className="px-4 py-2 bg-secondary/50 border-b border-border text-center">
         <p className="text-xs text-muted-foreground">
           Você está falando com o chat de{" "}
-          <span className="text-primary font-semibold">{TOPIC_LABELS[chatTopic]}</span>
+          <span className="text-primary font-semibold">{topicLabel}</span>
         </p>
       </div>
 
@@ -265,7 +285,7 @@ const ChatPage = () => {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <p className="text-sm text-muted-foreground">
-              Olá! Sou seu assistente de <span className="text-primary font-medium">{TOPIC_LABELS[chatTopic]}</span>.
+              Olá! Sou seu assistente de <span className="text-primary font-medium">{topicLabel}</span>.
             </p>
             <p className="text-xs text-muted-foreground">Como posso te ajudar?</p>
           </div>
