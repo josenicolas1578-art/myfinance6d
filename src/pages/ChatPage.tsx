@@ -80,6 +80,9 @@ async function streamChat({
 
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<ChatTopic, Msg[]>>({
     gastos: [],
     investimentos: [],
@@ -91,6 +94,17 @@ const ChatPage = () => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const messages = conversations[chatTopic];
+
+  useEffect(() => {
+    if (user) {
+      supabase
+        .from("profiles")
+        .select("form_completed")
+        .eq("user_id", user.id)
+        .maybeSingle()
+        .then(({ data }) => setFormCompleted(data?.form_completed ?? false));
+    }
+  }, [user]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
