@@ -86,7 +86,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<ChatTopic, Msg[]>>({
-    gastos: [],
+    gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
     investimentos: [],
     retornos: [],
   });
