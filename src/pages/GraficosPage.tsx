@@ -250,7 +250,7 @@ const GraficosPage = () => {
   }, [transactions, period]);
 
   return (
-    <div className="flex flex-col gap-5 px-4 py-5 max-w-lg mx-auto">
+    <div className="flex flex-col gap-5 px-4 py-5 max-w-lg lg:max-w-3xl mx-auto">
       {/* Period selector */}
       <div className="flex gap-2 justify-center">
         {(Object.keys(PERIOD_LABELS) as Period[]).map((p) => (

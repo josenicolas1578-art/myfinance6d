@@ -376,7 +376,7 @@ const PerfilPage = () => {
   };
 
   return (
-    <div className="flex flex-col items-center px-5 py-6 gap-5">
+    <div className="flex flex-col items-center px-5 py-6 gap-5 max-w-lg lg:max-w-2xl mx-auto w-full">
       {/* Avatar */}
       <div className="relative">
         <button
