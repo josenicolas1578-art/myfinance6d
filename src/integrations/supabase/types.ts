@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          current_balance: number | null
           display_name: string
           financial_goal: string | null
           fixed_expenses: number | null
@@ -32,6 +33,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          current_balance?: number | null
           display_name: string
           financial_goal?: string | null
           fixed_expenses?: number | null
@@ -46,6 +48,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          current_balance?: number | null
           display_name?: string
           financial_goal?: string | null
           fixed_expenses?: number | null
