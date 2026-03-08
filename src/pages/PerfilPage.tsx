@@ -3,7 +3,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy } from "lucide-react";
+import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy, Sparkles, PartyPopper } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
 import {
