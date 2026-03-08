@@ -37,7 +37,7 @@ const PerfilPage = () => {
     setLoading(true);
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target")
+      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target, current_balance")
       .eq("user_id", user!.id)
       .maybeSingle();
 
