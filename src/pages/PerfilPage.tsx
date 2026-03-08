@@ -333,6 +333,29 @@ const PerfilPage = () => {
           Sair da conta
         </Button>
       </div>
+
+      <AlertDialog open={balanceConfirmOpen} onOpenChange={setBalanceConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Alterar saldo manualmente?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Alterar o saldo manualmente pode desconfigurar o acompanhamento dos seus gastos e retornos, prejudicando a análise e o progresso registrados pelo aplicativo. Tem certeza que deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => openFieldEditor("current_balance")}
+            >
+              Sim, alterar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
