@@ -10,7 +10,11 @@ const tabs = [
   { id: "perfil", label: "Perfil", icon: UserCircle, path: "/dashboard/perfil" },
 ];
 
-const BottomNav = () => {
+interface BottomNavProps {
+  onAboutClick?: () => void;
+}
+
+const BottomNav = ({ onAboutClick }: BottomNavProps) => {
   const location = useLocation();
   const navigate = useNavigate();
 
