@@ -99,7 +99,7 @@ Exemplos:
       .filter((t: any) => t.amount > 0)
       .map((t: any) => ({
         user_id: user.id,
-        category: isCustomAgent ? (t.category || "gastos") : topic,
+        category: t.category || "gastos",
         amount: t.amount,
         description: t.description || null,
         transaction_date: new Date().toISOString().split("T")[0],

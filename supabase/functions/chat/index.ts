@@ -5,11 +5,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SYSTEM_PROMPTS: Record<string, string> = {
-  gastos: "Você é um assistente de controle de gastos. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
-  investimentos: "Você é um assistente de investimentos. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
-  retornos: "Você é um assistente de retornos financeiros. Seja direto e breve nas respostas. Use no máximo 2-3 frases por resposta. Responda em português brasileiro.",
-};
+const GENERAL_PROMPT = `Você é um assistente financeiro completo. Você gerencia gastos, investimentos e ganhos do usuário.
+
+Quando o usuário informar um gasto, investimento ou ganho, confirme o registro de forma breve e amigável.
+- Gastos: qualquer despesa, compra, pagamento (ex: "gastei 8 reais com uber")
+- Investimentos: aportes, compras de ativos (ex: "investi 160 numa maquininha") — isso também sai do saldo
+- Ganhos/Retornos: vendas, salários, lucros (ex: "vendi algo por 160") — isso entra no saldo
+
+Seja direto e breve nas respostas. Use no máximo 2-3 frases. Responda em português brasileiro.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
@@ -24,7 +27,7 @@ serve(async (req) => {
       const agentName = topic.replace("custom:", "");
       systemPrompt = `Você é ${agentName}, um gestor financeiro personalizado. Ajude o usuário com suas finanças de acordo com seu papel. Quando o usuário mencionar valores financeiros (gastos, investimentos, ganhos), registre e confirme. Seja direto e breve. Responda em português brasileiro.`;
     } else {
-      systemPrompt = SYSTEM_PROMPTS[topic] || SYSTEM_PROMPTS.gastos;
+      systemPrompt = GENERAL_PROMPT;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

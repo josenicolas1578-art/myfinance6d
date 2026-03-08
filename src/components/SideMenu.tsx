@@ -138,7 +138,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
       toast.success(`Gestor "${deleteAgent.name}" excluído`);
       // If active topic was this agent, switch to gastos
       if (activeTopic === `agent-${deleteAgent.id}`) {
-        onSelectTopic("gastos");
+        onSelectTopic("geral");
       }
       loadAgents();
     }

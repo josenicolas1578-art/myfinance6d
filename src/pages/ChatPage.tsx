@@ -88,9 +88,7 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<string, Msg[]>>({
-    gastos: [...INITIAL_MESSAGES.gastos],
-    investimentos: [],
-    retornos: [],
+    geral: [...INITIAL_MESSAGES.geral],
   });
   const [loadedTopics, setLoadedTopics] = useState<Set<string>>(new Set());
   const [input, setInput] = useState("");
