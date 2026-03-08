@@ -227,7 +227,7 @@ const ChatPage = () => {
     try {
       await streamChat({
         messages: allMessages,
-        topic: isCustomAgent ? `custom:${topicLabel}` : chatTopic,
+        topic: isCustomAgent ? `custom:${topicLabel}` : "geral",
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);
