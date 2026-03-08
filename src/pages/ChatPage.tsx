@@ -249,21 +249,22 @@ const ChatPage = () => {
 
   if (formCompleted === false) {
     return (
-      <div className="flex flex-col items-center justify-center gap-4 px-6 text-center" style={{ height: "calc(100dvh - 56px - 64px)" }}>
-        <div className="w-14 h-14 rounded-full bg-destructive/10 border border-destructive/30 flex items-center justify-center">
-          <AlertTriangle className="w-7 h-7 text-destructive" />
+      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center" style={{ height: "calc(100dvh - 56px - 64px)" }}>
+        <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center neon-glow">
+          <AlertTriangle className="w-8 h-8 text-primary" />
         </div>
-        <div className="space-y-2">
-          <h2 className="text-lg font-heading font-bold text-foreground">Formulário obrigatório</h2>
-          <p className="text-sm text-muted-foreground">
-            Você precisa responder o formulário na aba <span className="text-primary font-semibold">Perfil</span> antes de usar o chat.
+        <div className="space-y-3 max-w-[280px]">
+          <h2 className="text-lg font-heading font-bold text-foreground">Quase lá!</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Para utilizar a plataforma de forma livre, é necessário responder um{" "}
+            <span className="text-primary font-semibold">formulário obrigatório</span> na aba Perfil.
           </p>
         </div>
         <button
           onClick={() => navigate("/dashboard/perfil")}
-          className="px-6 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 neon-glow transition-all"
+          className="px-8 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 neon-glow transition-all shadow-lg shadow-primary/20"
         >
-          Ir para o Perfil
+          Preencher Formulário
         </button>
       </div>
     );
