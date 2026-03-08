@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 import logoImg from "@/assets/logo.png";
 import { Menu, X, Instagram } from "lucide-react";
 
@@ -9,11 +10,23 @@ const DashboardLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
+  const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
   const isChatPage = location.pathname === "/dashboard/chat";
 
+  useEffect(() => {
+    const seen = localStorage.getItem("myfinance_tutorial_done");
+    if (!seen) setShowTutorial(true);
+  }, []);
+
+  const completeTutorial = () => {
+    localStorage.setItem("myfinance_tutorial_done", "true");
+    setShowTutorial(false);
+  };
+
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
+      {showTutorial && <OnboardingTutorial onComplete={completeTutorial} />}
       <header className="border-b border-border bg-card px-4">
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
           {isChatPage ? (
