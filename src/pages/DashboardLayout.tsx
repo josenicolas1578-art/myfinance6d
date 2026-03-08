@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
+import OnboardingTutorial from "@/components/OnboardingTutorial";
 import logoImg from "@/assets/logo.png";
 import { Menu, X, Instagram } from "lucide-react";
 
