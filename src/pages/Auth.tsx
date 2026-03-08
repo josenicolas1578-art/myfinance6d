@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Eye, EyeOff, Mail, Lock } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, User } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import logoImg from "@/assets/logo.png";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -28,6 +29,10 @@ const Auth = () => {
       toast.error("Preencha todos os campos");
       return;
     }
+    if (!isLogin && !name.trim()) {
+      toast.error("Informe seu nome");
+      return;
+    }
     if (password.length < 6) {
       toast.error("A senha deve ter pelo menos 6 caracteres");
       return;
@@ -43,7 +48,10 @@ const Auth = () => {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: { display_name: name.trim() },
+          },
         });
         if (error) throw error;
         toast.success("Conta criada! Verifique seu e-mail para confirmar.");
@@ -78,8 +86,8 @@ const Auth = () => {
       {/* Right / Main - Form */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-6 sm:p-12">
         <div className="w-full max-w-sm flex flex-col items-center">
-          {/* Logo - always visible, compact on mobile */}
-          <div className="flex flex-col items-center gap-2 mb-6 lg:hidden">
+          {/* Mobile logo */}
+          <div className="flex flex-col items-center gap-2 mb-5 lg:hidden">
             <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary/30 neon-glow flex items-center justify-center bg-background">
               <img src={logoImg} alt="My Finance Logo" className="w-14 h-14 object-contain" />
             </div>
@@ -100,6 +108,25 @@ const Auth = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-3">
+              {!isLogin && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="name" className="text-sm">Como quer ser chamado?</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="name"
+                      type="text"
+                      placeholder="Seu nome"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                      required={!isLogin}
+                      maxLength={50}
+                    />
+                  </div>
+                </div>
+              )}
+
               <div className="space-y-1.5">
                 <Label htmlFor="email" className="text-sm">E-mail</Label>
                 <div className="relative">
