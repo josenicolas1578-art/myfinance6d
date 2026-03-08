@@ -23,16 +23,10 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await anonClient.auth.getUser(token);
     if (authError || !user) throw new Error("Unauthorized");
 
-    const { userMessage, assistantMessage, topic } = await req.json();
+    const { userMessage, assistantMessage } = await req.json();
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
-
-    // Always auto-detect category from message content
-    const categoryInstruction = `Detecte automaticamente a categoria de cada transação:
-- "gastos" para despesas, compras, pagamentos
-- "investimentos" para aportes, investimentos
-- "retornos" para lucros, rendimentos, ganhos, salários recebidos`;
 
     const systemPrompt = `Você é um extrator de transações financeiras. Retorne APENAS um array JSON válido. Sem markdown, sem texto, sem explicação. Apenas o array JSON.
 
