@@ -2,9 +2,21 @@ import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { LogOut, Camera, Settings } from "lucide-react";
+import { LogOut, Camera, Settings, Wallet, Target, PiggyBank, DollarSign } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
+
+const GOAL_LABELS: Record<string, string> = {
+  economizar: "Economizar dinheiro",
+  sair_dividas: "Sair das dívidas",
+  investir: "Começar a investir",
+  organizar: "Organizar minhas finanças",
+};
+
+const formatBRL = (value: number | null) => {
+  if (!value) return "—";
+  return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
 
 const PerfilPage = () => {
   const { user, signOut } = useAuth();
@@ -13,6 +25,8 @@ const PerfilPage = () => {
   const [uploading, setUploading] = useState(false);
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingForm, setEditingForm] = useState(false);
+  const [profileData, setProfileData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -23,7 +37,7 @@ const PerfilPage = () => {
     setLoading(true);
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, form_completed")
+      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target")
       .eq("user_id", user!.id)
       .maybeSingle();
 
@@ -31,10 +45,12 @@ const PerfilPage = () => {
       setDisplayName(data.display_name || "");
       setAvatarUrl(data.avatar_url || null);
       setFormCompleted(data.form_completed ?? false);
+      setProfileData(data);
     } else {
       setFormCompleted(false);
     }
     setLoading(false);
+    setEditingForm(false);
   };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +107,7 @@ const PerfilPage = () => {
     );
   }
 
-  if (!formCompleted) {
+  if (!formCompleted || editingForm) {
     return <ProfileForm userId={user!.id} onComplete={fetchProfile} />;
   }
 
@@ -130,18 +146,75 @@ const PerfilPage = () => {
         <p className="text-xs text-muted-foreground">{user?.email}</p>
       </div>
 
+      {/* Financial info */}
+      {profileData && (
+        <div className="w-full max-w-xs space-y-3">
+          <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+              <Wallet className="w-4 h-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Tipo de renda</p>
+                <p className="text-sm font-medium text-foreground">
+                  {profileData.salary_type === "fixo" ? "Renda Fixa" : "Renda Variável"}
+                </p>
+              </div>
+            </div>
+
+            {profileData.salary_type === "fixo" && profileData.salary_amount && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+                <DollarSign className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Salário mensal</p>
+                  <p className="text-sm font-medium text-foreground">{formatBRL(profileData.salary_amount)}</p>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+              <Wallet className="w-4 h-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Despesas fixas mensais</p>
+                <p className="text-sm font-medium text-foreground">{formatBRL(profileData.fixed_expenses)}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+              <Target className="w-4 h-4 text-primary shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs text-muted-foreground">Objetivo financeiro</p>
+                <p className="text-sm font-medium text-foreground">
+                  {GOAL_LABELS[profileData.financial_goal] || profileData.financial_goal || "—"}
+                </p>
+              </div>
+            </div>
+
+            {profileData.savings_target && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+                <PiggyBank className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Meta de economia mensal</p>
+                  <p className="text-sm font-medium text-foreground">{formatBRL(profileData.savings_target)}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Edit form button */}
       <Button
         variant="outline"
         className="w-full max-w-xs border-border text-muted-foreground hover:text-foreground"
-        onClick={() => setFormCompleted(false)}
+        onClick={() => setEditingForm(true)}
       >
         <Settings className="w-4 h-4 mr-2" />
         Editar perfil financeiro
       </Button>
 
       {/* Logout */}
-      <div className="w-full max-w-xs mt-4">
+      <div className="w-full max-w-xs mt-2">
         <Button
           variant="outline"
           className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
