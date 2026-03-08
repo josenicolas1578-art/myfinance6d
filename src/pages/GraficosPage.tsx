@@ -415,9 +415,17 @@ const GraficosPage = () => {
                   <Icon className="w-4 h-4" style={{ color: config.color }} />
                   <h3 className="text-sm font-heading font-semibold text-foreground">{config.label}</h3>
                 </div>
-                <span className="text-sm font-bold" style={{ color: config.color }}>
-                  {formatBRL(totals[cat])}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold" style={{ color: config.color }}>
+                    {formatBRL(totals[cat])}
+                  </span>
+                  <button
+                    onClick={() => setDetailCategory(cat)}
+                    className="p-1 rounded-md hover:bg-secondary transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
 
               {data.length === 0 || data.every((d) => d.total === 0) ? (
