@@ -117,6 +117,8 @@ const PerfilPage = () => {
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [clearingData, setClearingData] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) fetchProfile();
