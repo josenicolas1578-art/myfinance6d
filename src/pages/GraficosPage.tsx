@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { TrendingDown, TrendingUp, BarChart3, ShieldAlert, Activity } from "lucide-react";
+import { TrendingDown, TrendingUp, BarChart3, ShieldAlert, Activity, MoreVertical, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
@@ -22,6 +22,7 @@ interface Transaction {
   amount: number;
   transaction_date: string;
   category: string;
+  description: string | null;
 }
 
 const PERIOD_LABELS: Record<Period, string> = {
@@ -56,6 +57,7 @@ const GraficosPage = () => {
   const [period, setPeriod] = useState<Period>("mes");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [detailCategory, setDetailCategory] = useState<Category | "geral" | null>(null);
 
   // Daily limit state
   const [dailyLimit, setDailyLimit] = useState<number | null>(null);
@@ -98,7 +100,7 @@ const GraficosPage = () => {
 
     const { data } = await supabase
       .from("transactions")
-      .select("amount, transaction_date, category")
+      .select("amount, transaction_date, category, description")
       .eq("user_id", user!.id)
       .gte("transaction_date", startDate)
       .order("transaction_date", { ascending: true });
@@ -142,7 +144,10 @@ const GraficosPage = () => {
 
   const buildChartData = (category: Category) => {
     const now = new Date();
-    const filtered = transactions.filter((t) => t.category === category);
+    // Gastos chart includes investimentos too (investments are also expenses)
+    const filtered = category === "gastos"
+      ? transactions.filter((t) => t.category === "gastos" || t.category === "investimentos")
+      : transactions.filter((t) => t.category === category);
     const dateMap: Record<string, number> = {};
 
     if (period === "hoje") {
@@ -181,8 +186,23 @@ const GraficosPage = () => {
         result[t.category as Category] += Number(t.amount);
       }
     });
+    // Gastos includes investimentos (investments are also expenses)
+    result.gastos += result.investimentos;
     return result;
   }, [transactions]);
+
+  // Get detail transactions for the selected category
+  const detailTransactions = useMemo(() => {
+    if (!detailCategory) return [];
+    if (detailCategory === "gastos") {
+      return transactions.filter((t) => t.category === "gastos" || t.category === "investimentos");
+    }
+    if (detailCategory === "geral") {
+      // Show all unique transactions (don't double-count)
+      return transactions;
+    }
+    return transactions.filter((t) => t.category === detailCategory);
+  }, [detailCategory, transactions]);
 
   const generalChartData = useMemo(() => {
     const now = new Date();
@@ -314,11 +334,19 @@ const GraficosPage = () => {
                 <Activity className="w-4 h-4 text-primary" />
                 <h3 className="text-sm font-heading font-semibold text-foreground">Visão Geral</h3>
               </div>
-              <span className={`text-sm font-bold ${
-                generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]"
-              }`}>
-                {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-bold ${
+                  generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]"
+                }`}>
+                  {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
+                </span>
+                <button
+                  onClick={() => setDetailCategory("geral")}
+                  className="p-1 rounded-md hover:bg-secondary transition-colors"
+                >
+                  <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                </button>
+              </div>
             </div>
 
             {generalChartData.length === 0 || generalChartData.every((d) => d.net === 0) ? (
@@ -387,9 +415,17 @@ const GraficosPage = () => {
                   <Icon className="w-4 h-4" style={{ color: config.color }} />
                   <h3 className="text-sm font-heading font-semibold text-foreground">{config.label}</h3>
                 </div>
-                <span className="text-sm font-bold" style={{ color: config.color }}>
-                  {formatBRL(totals[cat])}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold" style={{ color: config.color }}>
+                    {formatBRL(totals[cat])}
+                  </span>
+                  <button
+                    onClick={() => setDetailCategory(cat)}
+                    className="p-1 rounded-md hover:bg-secondary transition-colors"
+                  >
+                    <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                  </button>
+                </div>
               </div>
 
               {data.length === 0 || data.every((d) => d.total === 0) ? (
@@ -467,6 +503,51 @@ const GraficosPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Transaction detail overlay */}
+      {detailCategory && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setDetailCategory(null)} />
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-t-2xl max-h-[70vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+              <h3 className="text-sm font-heading font-semibold text-foreground">
+                {detailCategory === "geral" ? "Relatório Geral" :
+                 detailCategory === "gastos" ? "Detalhes dos Gastos" :
+                 detailCategory === "investimentos" ? "Detalhes dos Investimentos" :
+                 "Detalhes dos Retornos"}
+              </h3>
+              <button onClick={() => setDetailCategory(null)} className="p-1 rounded-md hover:bg-secondary">
+                <X className="w-4 h-4 text-muted-foreground" />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 p-4 space-y-2">
+              {detailTransactions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-8">Nenhuma transação no período</p>
+              ) : (
+                detailTransactions.map((t, i) => {
+                  const label = detailCategory === "geral"
+                    ? (t.category === "retornos" ? "Ganhou" : t.category === "investimentos" ? "Investiu" : "Gastou")
+                    : detailCategory === "investimentos" ? "Investiu"
+                    : detailCategory === "retornos" ? "Ganhou"
+                    : (t.category === "investimentos" ? "Investiu/Gastou" : "Gastou");
+                  const color = t.category === "retornos" ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]";
+                  return (
+                    <div key={i} className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-secondary/50 border border-border/50">
+                      <div className="flex flex-col">
+                        <span className="text-sm text-foreground">{label} {t.description || "Sem descrição"}</span>
+                        <span className="text-xs text-muted-foreground">{t.transaction_date.slice(5).replace("-", "/")}</span>
+                      </div>
+                      <span className={`text-sm font-semibold ${color}`}>
+                        {formatBRL(Number(t.amount))}
+                      </span>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
