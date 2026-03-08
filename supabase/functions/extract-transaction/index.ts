@@ -34,56 +34,24 @@ serve(async (req) => {
 - "investimentos" para aportes, investimentos
 - "retornos" para lucros, rendimentos, ganhos, salários recebidos`;
 
-    const extractPrompt = `Você é um extrator de transações financeiras extremamente preciso. Analise a mensagem do usuário e extraia TODAS as transações financeiras NOVAS.
+    const systemPrompt = `Você é um extrator de transações financeiras. Retorne APENAS um array JSON válido. Sem markdown, sem texto, sem explicação. Apenas o array JSON.
 
-REGRAS CRÍTICAS:
-1. Extraia APENAS transações que JÁ ACONTECERAM (não futuras/projeções).
-2. Cada transação pertence a UMA ÚNICA categoria. NUNCA duplique.
-3. NÃO re-extraia valores mencionados como contexto de transações anteriores.
-4. Se o usuário menciona retorno E investimento original na mesma frase, extraia APENAS o retorno.
+REGRAS:
+1. Extraia APENAS transações NOVAS da mensagem do usuário (não da resposta do assistente).
+2. Cada transação tem: amount (número positivo), description (texto curto), category ("gastos", "investimentos" ou "retornos").
+3. Se não houver transação, retorne [].
 
-CLASSIFICAÇÃO POR PALAVRAS-CHAVE:
+CLASSIFICAÇÃO:
+- "gastos": gastei, paguei, comprei (roupas, comida, eletrônicos), perdi, conta de, boleto, uber, mercado, farmácia, restaurante
+- "investimentos": investi, apliquei, aportei, comprei (ações, cripto, maquininha, equipamento de trabalho)
+- "retornos": recebi, ganhei, me deram, me pagaram, vendi, entrou, caiu na conta, salário, freelance, retorno, lucro, rendimento
 
-"gastos" (dinheiro que SAIU para consumo pessoal):
-- "gastei", "paguei", "comprei" (roupas, comida, eletrônicos, presentes para outros)
-- "perdi" (perda de dinheiro)
-- "almocei", "jantei", "comi" (alimentação)
-- "assinei" (assinaturas, serviços)
-- "conta de", "boleto", "parcela"
-- Uber, mercado, farmácia, restaurante, lanche, roupa, camisa, tênis, celular
+"comprei camisa" = gastos. "comprei ações" = investimentos. "recebi 5000" = retornos.`;
 
-"investimentos" (dinheiro aplicado com expectativa de RETORNO):
-- "investi", "apliquei", "aportei"
-- "comprei" + (ações, cripto, maquininha de cartão, equipamento para trabalho/negócio)
-- Ações, fundos, cripto, bitcoin, maquininha, equipamento profissional
-
-"retornos" (dinheiro que ENTROU):
-- "recebi", "ganhei", "me deram", "me pagaram"
-- "vendi" (venda de produto/serviço)
-- "entrou", "caiu na conta"
-- "salário", "freelance", "retorno", "lucro", "rendimento"
-- "ganhei de presente" (presente recebido em dinheiro)
-
-ATENÇÃO: "comprei uma camisa" = GASTO. "comprei ações" = INVESTIMENTO. O contexto da compra define a categoria!
-
-Mensagem do usuário: "${userMessage}"
+    const userContent = `Mensagem do usuário: "${userMessage}"
 Resposta do assistente: "${assistantMessage}"
 
-Retorne APENAS um JSON válido (sem markdown, sem texto extra). Se não houver transação NOVA, retorne [].
-Formato: [{"amount": numero_positivo, "description": "descrição curta", "category": "gastos"|"investimentos"|"retornos"}]
-
-Exemplos:
-- "Comprei uma camisa de 240 reais" → [{"amount": 240, "description": "Camisa", "category": "gastos"}]
-- "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber", "category": "gastos"}]
-- "Comprei um tênis de 350" → [{"amount": 350, "description": "Tênis", "category": "gastos"}]
-- "Perdi 50 reais" → [{"amount": 50, "description": "Perda", "category": "gastos"}]
-- "Investi 160 numa maquininha" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}]
-- "Comprei 500 em ações" → [{"amount": 500, "description": "Ações", "category": "investimentos"}]
-- "Recebi 1000 de salário" → [{"amount": 1000, "description": "Salário", "category": "retornos"}]
-- "Vendi um produto por 200" → [{"amount": 200, "description": "Venda de produto", "category": "retornos"}]
-- "Me deram 100 reais de presente" → [{"amount": 100, "description": "Presente recebido", "category": "retornos"}]
-- "Ganhei 50 reais" → [{"amount": 50, "description": "Ganho", "category": "retornos"}]
-- "Bom dia" → []`;
+Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -93,7 +61,11 @@ Exemplos:
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [{ role: "user", content: extractPrompt }],
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userContent },
+        ],
+        temperature: 0,
       }),
     });
 
