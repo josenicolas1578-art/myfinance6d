@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import DashboardLayout from "./pages/DashboardLayout";
 import ChatPage from "./pages/ChatPage";
 import GraficosPage from "./pages/GraficosPage";
+import ResumosPage from "./pages/ResumosPage";
 import PerfilPage from "./pages/PerfilPage";
 import NotFound from "./pages/NotFound";
 
