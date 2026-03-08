@@ -348,9 +348,6 @@ const GraficosPage = () => {
                 </button>
               </div>
             </div>
-                {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
-              </span>
-            </div>
 
             {generalChartData.length === 0 || generalChartData.every((d) => d.net === 0) ? (
               <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
