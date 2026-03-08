@@ -150,7 +150,11 @@ const ChatPage = () => {
         messages: allMessages,
         topic: chatTopic,
         onDelta: upsertAssistant,
-        onDone: () => setIsLoading(false),
+        onDone: () => {
+          setIsLoading(false);
+          // Extract transactions in background
+          extractTransactions(text, assistantSoFar, chatTopic);
+        },
       });
     } catch (e: any) {
       toast.error(e.message || "Erro ao enviar mensagem");
