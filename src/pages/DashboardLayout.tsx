@@ -52,13 +52,6 @@ const DashboardLayout = () => {
         <header className="border-b border-border bg-card px-4" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           <div className="flex items-center justify-between h-14 w-full">
             <div className="flex items-center gap-2">
-              {/* App icon - desktop only (left side) */}
-              <button
-                onClick={() => setAboutOpen(true)}
-                className="hidden lg:flex w-8 h-8 rounded-full overflow-hidden border border-primary/30 items-center justify-center bg-background hover:opacity-80 transition-opacity"
-              >
-                <img src={appIcon} alt="My Finance" className="w-5 h-5 object-contain" />
-              </button>
               {isChatPage && (
                 <button
                   onClick={() => setMenuOpen(true)}
