@@ -209,7 +209,6 @@ const PerfilPage = () => {
                 </div>
               </div>
             )}
-            )}
           </div>
         </div>
       )}
