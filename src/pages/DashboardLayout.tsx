@@ -6,7 +6,7 @@ import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+
 import appIcon from "@/assets/app-icon.png";
 import { Menu, X, Instagram, Wallet } from "lucide-react";
 
