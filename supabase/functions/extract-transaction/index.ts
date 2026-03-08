@@ -28,7 +28,6 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // Ask AI to extract financial transactions from the user message
     const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras mencionadas.
 
 Categoria: "${topic}" (gastos = despesas/compras, investimentos = aportes/investimentos, retornos = lucros/rendimentos)
@@ -43,6 +42,7 @@ Exemplos:
 - "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber"}]
 - "Fui no mercado e gastei 12 reais com lanche" → [{"amount": 12, "description": "Lanche no mercado"}]
 - "Investi 500 reais em ações" → [{"amount": 500, "description": "Ações"}]
+- "Tive um retorno de 200 reais" → [{"amount": 200, "description": "Retorno de investimento"}]
 - "Bom dia" → []`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -66,8 +66,6 @@ Exemplos:
 
     const aiData = await aiResp.json();
     let rawContent = aiData.choices?.[0]?.message?.content?.trim() || "[]";
-    
-    // Clean markdown code blocks if present
     rawContent = rawContent.replace(/```json?\s*/g, "").replace(/```/g, "").trim();
 
     let transactions: { amount: number; description: string }[] = [];
@@ -100,6 +98,35 @@ Exemplos:
     if (rows.length > 0) {
       const { error: insertError } = await supabase.from("transactions").insert(rows);
       if (insertError) console.error("Insert error:", insertError);
+
+      // Update current_balance on profile
+      // gastos → subtract, retornos → add, investimentos → subtract (money going out)
+      const totalAmount = rows.reduce((sum, r) => sum + r.amount, 0);
+
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("current_balance")
+        .eq("user_id", user.id)
+        .single();
+
+      if (profile) {
+        const currentBalance = profile.current_balance ?? 0;
+        let newBalance: number;
+
+        if (topic === "retornos") {
+          newBalance = currentBalance + totalAmount;
+        } else {
+          // gastos and investimentos subtract from balance
+          newBalance = currentBalance - totalAmount;
+        }
+
+        const { error: updateError } = await supabase
+          .from("profiles")
+          .update({ current_balance: newBalance })
+          .eq("user_id", user.id);
+
+        if (updateError) console.error("Balance update error:", updateError);
+      }
     }
 
     return new Response(JSON.stringify({ transactions: rows }), {
