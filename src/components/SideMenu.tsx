@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, DollarSign, TrendingUp, RotateCcw, Plus, Bot } from "lucide-react";
+import { X, DollarSign, TrendingUp, RotateCcw, Plus, Bot, Trash2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,16 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -42,6 +52,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
   const [agentName, setAgentName] = useState("");
   const [agentDesc, setAgentDesc] = useState("");
   const [creating, setCreating] = useState(false);
+  const [deleteAgent, setDeleteAgent] = useState<CustomAgent | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -66,6 +77,12 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
     setCustomAgents((data as CustomAgent[]) || []);
   };
 
+  const handleCreateClick = () => {
+    onClose();
+    // Small delay so menu closes before dialog opens
+    setTimeout(() => setDialogOpen(true), 200);
+  };
+
   const createAgent = async () => {
     if (!agentName.trim() || !user) return;
     setCreating(true);
@@ -86,8 +103,28 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
     setCreating(false);
   };
 
+  const confirmDelete = async () => {
+    if (!deleteAgent) return;
+    const { error } = await supabase
+      .from("custom_agents")
+      .delete()
+      .eq("id", deleteAgent.id);
+    if (error) {
+      toast.error("Erro ao excluir gestor");
+    } else {
+      toast.success(`Gestor "${deleteAgent.name}" excluído`);
+      // If active topic was this agent, switch to gastos
+      if (activeTopic === `agent-${deleteAgent.id}`) {
+        onSelectTopic("gastos");
+      }
+      loadAgents();
+    }
+    setDeleteAgent(null);
+  };
+
   return (
     <>
+      {/* Backdrop */}
       <div
         className={`fixed inset-0 z-50 bg-background/60 backdrop-blur-sm transition-opacity duration-300 ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
@@ -95,6 +132,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
         onClick={onClose}
       />
 
+      {/* Sliding panel */}
       <div
         className={`fixed top-0 left-0 z-50 h-full w-3/4 max-w-xs bg-card border-r border-border shadow-elevated transition-transform duration-300 ease-out flex flex-col ${
           open ? "translate-x-0" : "-translate-x-full"
@@ -140,26 +178,42 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
           {customAgents.map((agent) => {
             const isActive = activeTopic === `agent-${agent.id}`;
             return (
-              <button
+              <div
                 key={agent.id}
-                onClick={() => {
-                  onSelectTopic(`agent-${agent.id}`);
-                  onClose();
-                }}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg text-left transition-all ${
+                className={`flex items-center gap-1 rounded-lg transition-all ${
                   isActive
-                    ? "bg-primary/15 border border-primary/50 text-primary shadow-[0_0_12px_-2px_hsl(var(--primary)/0.5)]"
-                    : "border border-primary/20 text-primary/80 hover:bg-primary/10 hover:text-primary shadow-[0_0_8px_-3px_hsl(var(--primary)/0.3)]"
+                    ? "bg-primary/15 border border-primary/50 shadow-[0_0_12px_-2px_hsl(var(--primary)/0.5)]"
+                    : "border border-primary/20 shadow-[0_0_8px_-3px_hsl(var(--primary)/0.3)]"
                 }`}
               >
-                <Bot className="w-4 h-4 shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-medium">{agent.name}</p>
-                  {agent.description && (
-                    <p className="text-[10px] opacity-70 whitespace-normal">{agent.description}</p>
-                  )}
-                </div>
-              </button>
+                <button
+                  onClick={() => {
+                    onSelectTopic(`agent-${agent.id}`);
+                    onClose();
+                  }}
+                  className={`flex-1 flex items-center gap-3 px-3 py-3 text-left transition-all ${
+                    isActive ? "text-primary" : "text-primary/80 hover:text-primary"
+                  }`}
+                >
+                  <Bot className="w-4 h-4 shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">{agent.name}</p>
+                    {agent.description && (
+                      <p className="text-[10px] opacity-70 whitespace-normal">{agent.description}</p>
+                    )}
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClose();
+                    setTimeout(() => setDeleteAgent(agent), 200);
+                  }}
+                  className="w-8 h-8 flex items-center justify-center text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors shrink-0 mr-1"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             );
           })}
         </div>
@@ -167,7 +221,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
         {/* Create agent button */}
         <div className="p-3 border-t border-border shrink-0">
           <button
-            onClick={() => setDialogOpen(true)}
+            onClick={handleCreateClick}
             className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 neon-glow transition-all"
           >
             <Plus className="w-4 h-4" />
@@ -178,7 +232,7 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
 
       {/* Create agent dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="w-[calc(100%-3rem)] max-w-sm rounded-2xl">
+        <DialogContent className="z-[60] w-[calc(100%-3rem)] max-w-sm rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Bot className="w-5 h-5 text-primary" />
@@ -220,6 +274,30 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation */}
+      <AlertDialog open={!!deleteAgent} onOpenChange={(open) => !open && setDeleteAgent(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-destructive" />
+              Excluir gestor
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o gestor <strong>"{deleteAgent?.name}"</strong>? O histórico de conversas será mantido, mas o gestor não aparecerá mais no menu.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={confirmDelete}
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
