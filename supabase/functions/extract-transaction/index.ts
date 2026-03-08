@@ -28,21 +28,30 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
+    // For custom agents, auto-detect category; for built-in topics, use directly
+    const isCustomAgent = topic.startsWith("agent-") || topic.startsWith("custom:");
+    const categoryInstruction = isCustomAgent
+      ? `Detecte automaticamente a categoria de cada transação:
+- "gastos" para despesas, compras, pagamentos
+- "investimentos" para aportes, investimentos
+- "retornos" para lucros, rendimentos, ganhos, salários recebidos`
+      : `Categoria: "${topic}" (gastos = despesas/compras, investimentos = aportes/investimentos, retornos = lucros/rendimentos)`;
+
     const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras mencionadas.
 
-Categoria: "${topic}" (gastos = despesas/compras, investimentos = aportes/investimentos, retornos = lucros/rendimentos)
+${categoryInstruction}
 
 Mensagem do usuário: "${userMessage}"
 Resposta do assistente: "${assistantMessage}"
 
 Retorne APENAS um JSON válido (sem markdown, sem texto extra). Se não houver transação, retorne [].
-Formato: [{"amount": numero_positivo, "description": "descrição curta"}]
+Formato: [{"amount": numero_positivo, "description": "descrição curta", "category": "gastos"|"investimentos"|"retornos"}]
 
 Exemplos:
-- "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber"}]
-- "Fui no mercado e gastei 12 reais com lanche" → [{"amount": 12, "description": "Lanche no mercado"}]
-- "Investi 500 reais em ações" → [{"amount": 500, "description": "Ações"}]
-- "Tive um retorno de 200 reais" → [{"amount": 200, "description": "Retorno de investimento"}]
+- "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber", "category": "gastos"}]
+- "Fui no mercado e gastei 12 reais com lanche" → [{"amount": 12, "description": "Lanche no mercado", "category": "gastos"}]
+- "Investi 500 reais em ações" → [{"amount": 500, "description": "Ações", "category": "investimentos"}]
+- "Tive um retorno de 200 reais" → [{"amount": 200, "description": "Retorno de investimento", "category": "retornos"}]
 - "Bom dia" → []`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
