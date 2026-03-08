@@ -506,9 +506,9 @@ const GraficosPage = () => {
 
       {/* Transaction detail overlay */}
       {detailCategory && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center">
+        <div className="fixed inset-0 z-[70] flex items-end justify-center">
           <div className="absolute inset-0 bg-black/60" onClick={() => setDetailCategory(null)} />
-          <div className="relative w-full max-w-lg bg-card border border-border rounded-t-2xl max-h-[70vh] flex flex-col animate-in slide-in-from-bottom duration-300">
+          <div className="relative w-full max-w-lg bg-card border border-border rounded-t-2xl h-[85dvh] min-h-0 flex flex-col animate-in slide-in-from-bottom duration-300">
             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
               <h3 className="text-sm font-heading font-semibold text-foreground">
                 {detailCategory === "geral" ? "Relatório Geral" :
@@ -520,7 +520,7 @@ const GraficosPage = () => {
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
-            <div className="overflow-y-auto flex-1 p-4 space-y-2 overscroll-contain touch-pan-y">
+            <div className="overflow-y-auto flex-1 min-h-0 p-4 space-y-2 overscroll-contain touch-pan-y pb-24" style={{ WebkitOverflowScrolling: "touch" }}>
               {detailTransactions.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhuma transação no período</p>
               ) : (
