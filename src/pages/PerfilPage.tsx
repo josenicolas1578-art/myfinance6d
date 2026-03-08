@@ -194,7 +194,7 @@ const PerfilPage = () => {
     }
   };
 
-
+  const startEdit = (field: EditableField) => {
     if (!field || !profileData) return;
     if (field === "current_balance") {
       setBalanceConfirmOpen(true);
