@@ -159,7 +159,42 @@ const PerfilPage = () => {
     setEditingForm(false);
   };
 
-  const startEdit = (field: EditableField) => {
+  const handleClearData = async () => {
+    if (!user) return;
+    setClearingData(true);
+    try {
+      // Delete all transactions
+      await supabase.from("transactions").delete().eq("user_id", user.id);
+      // Delete all chat messages
+      await supabase.from("chat_messages").delete().eq("user_id", user.id);
+      // Delete all custom agents
+      await supabase.from("custom_agents").delete().eq("user_id", user.id);
+      // Reset profile data
+      await supabase.from("profiles").update({
+        form_completed: false,
+        current_balance: null,
+        salary_amount: null,
+        salary_type: null,
+        fixed_expenses: null,
+        financial_goal: null,
+        savings_target: null,
+        goal_amount: null,
+        daily_spending_limit: null,
+      }).eq("user_id", user.id);
+      // Clear localStorage tutorial flag
+      localStorage.removeItem(`myfinance_tutorial_done_${user.id}`);
+      toast.success("Dados limpos com sucesso!");
+      navigate("/dashboard/chat");
+      // Force reload to reset all state
+      window.location.reload();
+    } catch (e: any) {
+      toast.error("Erro ao limpar dados: " + (e.message || "Tente novamente"));
+    } finally {
+      setClearingData(false);
+    }
+  };
+
+
     if (!field || !profileData) return;
     if (field === "current_balance") {
       setBalanceConfirmOpen(true);
