@@ -120,7 +120,7 @@ const Auth = () => {
                       placeholder="Seu nome"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                      className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-base"
                       required={!isLogin}
                       maxLength={50}
                     />
