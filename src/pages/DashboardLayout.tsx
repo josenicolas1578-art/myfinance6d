@@ -23,7 +23,6 @@ const DashboardLayout = () => {
     localStorage.setItem("myfinance_tutorial_done", "true");
     setShowTutorial(false);
   };
-  const isChatPage = location.pathname === "/dashboard/chat";
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
