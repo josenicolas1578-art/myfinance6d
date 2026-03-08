@@ -58,6 +58,7 @@ const PerfilPage = () => {
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingForm, setEditingForm] = useState(false);
+  const [balanceConfirmOpen, setBalanceConfirmOpen] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
