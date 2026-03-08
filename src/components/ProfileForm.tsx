@@ -67,6 +67,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           fixed_expenses: parseCurrency(fixedExpenses),
           financial_goal: financialGoal,
           savings_target: parseCurrency(savingsTarget),
+          current_balance: parseCurrency(currentBalance),
           form_completed: true,
         })
         .eq("user_id", userId);
