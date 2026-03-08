@@ -57,6 +57,7 @@ const GraficosPage = () => {
   const [period, setPeriod] = useState<Period>("mes");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [detailCategory, setDetailCategory] = useState<Category | "geral" | null>(null);
 
   // Daily limit state
   const [dailyLimit, setDailyLimit] = useState<number | null>(null);
