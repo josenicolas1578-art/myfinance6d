@@ -109,6 +109,8 @@ const PerfilPage = () => {
   const [goalModalOpen, setGoalModalOpen] = useState(false);
   const [goalInput, setGoalInput] = useState("");
   const [savingGoal, setSavingGoal] = useState(false);
+  const [celebrationOpen, setCelebrationOpen] = useState(false);
+  const [celebrationMsg, setCelebrationMsg] = useState("");
 
   // Inline editing
   const [editingField, setEditingField] = useState<EditableField>(null);
