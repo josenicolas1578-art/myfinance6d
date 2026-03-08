@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Target, Sparkles, ArrowRight, AlertTriangle } from "lucide-react";
+import { MessageCircle, Target, Sparkles, ArrowRight, AlertTriangle, BarChart3, FileText, Trophy, Brain } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
 interface OnboardingTutorialProps {
@@ -11,27 +11,38 @@ const steps = [
   {
     icon: null, // logo
     title: "Bem-vindo ao My Finance!",
-    description: "Seu assistente financeiro inteligente. Vamos te mostrar como tudo funciona.",
+    description:
+      "Seu assistente financeiro inteligente. Nosso foco é te ajudar a organizar suas finanças, controlar gastos, investimentos e alcançar seus objetivos de forma simples.",
   },
   {
-    icon: Target,
-    title: "Nosso foco",
-    description: "Te ajudar a organizar suas finanças, controlar gastos e alcançar seus objetivos de forma simples e prática.",
+    icon: Brain,
+    title: "Inteligência Artificial",
+    description:
+      "Converse com nossa IA especializada em finanças. Ela analisa seus dados, entende seus padrões de gastos e te dá orientações personalizadas em tempo real.",
   },
   {
-    icon: MessageCircle,
-    title: "Chats inteligentes",
-    description: "Converse com nossa IA sobre Gastos, Investimentos e Retornos. Cada chat é especializado pra te ajudar no que você precisa.",
+    icon: BarChart3,
+    title: "Gráficos e Métricas",
+    description:
+      "Acompanhe seus gastos, investimentos e retornos com gráficos visuais. Metrificamos tudo pra você ter clareza total da sua vida financeira.",
   },
   {
-    icon: Sparkles,
-    title: "Tudo personalizado",
-    description: "Preencha seu perfil financeiro e receba orientações feitas sob medida pra sua realidade.",
+    icon: FileText,
+    title: "Resumos Inteligentes",
+    description:
+      "Gere resumos diários, semanais e mensais automaticamente. Saiba exatamente pra onde seu dinheiro está indo sem precisar calcular nada.",
+  },
+  {
+    icon: Trophy,
+    title: "Metas e Objetivos",
+    description:
+      "Defina suas metas financeiras e acompanhe o progresso em tempo real. A barra de progresso te mostra o quão perto você está de alcançar seu objetivo.",
   },
   {
     icon: AlertTriangle,
-    title: "⚠️ Formulário obrigatório!",
-    description: "Antes de usar o app, você PRECISA preencher o formulário na aba Perfil. Sem ele, o chat e as outras funções ficam bloqueados. É rápido e essencial!",
+    title: "⚠️ Último passo!",
+    description:
+      "Antes de usar o app, você precisa preencher um formulário rápido na aba Perfil com suas informações financeiras. É essencial pra personalizar tudo pra você!",
   },
 ];
 
@@ -62,8 +73,12 @@ const OnboardingTutorial = ({ onComplete }: OnboardingTutorialProps) => {
               <img src={logoImg} alt="My Finance" className="w-10 h-10 object-contain" />
             </div>
           ) : current.icon ? (
-            <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center">
-              <current.icon className="w-7 h-7 text-primary" />
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${
+              isLast
+                ? "bg-destructive/10 border border-destructive/30"
+                : "bg-primary/10 border border-primary/30"
+            }`}>
+              <current.icon className={`w-7 h-7 ${isLast ? "text-destructive" : "text-primary"}`} />
             </div>
           ) : null}
 
@@ -92,9 +107,13 @@ const OnboardingTutorial = ({ onComplete }: OnboardingTutorialProps) => {
                 setStep(step + 1);
               }
             }}
-            className="flex-1 h-10 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold text-sm"
+            className={`flex-1 h-10 font-semibold text-sm ${
+              isLast
+                ? "bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+                : "bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
+            }`}
           >
-            {isLast ? "Começar!" : (
+            {isLast ? "Ir para o Perfil" : (
               <>
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-1" />

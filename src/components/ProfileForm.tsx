@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Check, AlertTriangle, Target, Wallet, PiggyBank } from "lucide-react";
+import { Check, AlertTriangle, Target, Wallet, PiggyBank, Trophy } from "lucide-react";
 import { toast } from "sonner";
 
 type SalaryType = "fixo" | "variavel";
@@ -28,6 +28,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
   const [financialGoal, setFinancialGoal] = useState<string | null>(null);
   const [savingsTarget, setSavingsTarget] = useState("");
   const [currentBalance, setCurrentBalance] = useState("");
+  const [goalAmount, setGoalAmount] = useState("");
   const [saving, setSaving] = useState(false);
 
   const formatCurrency = (value: string) => {
@@ -69,6 +70,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           financial_goal: financialGoal,
           savings_target: parseCurrency(savingsTarget),
           current_balance: parseCurrency(currentBalance),
+          goal_amount: parseCurrency(goalAmount),
           form_completed: true,
         })
         .eq("user_id", userId);
@@ -87,12 +89,13 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
     if (step === 0) return !!salaryType && (salaryType === "variavel" || !!salaryAmount);
     if (step === 1) return !!fixedExpenses;
     if (step === 2) return !!financialGoal;
-    if (step === 3) return true;
+    if (step === 3) return true; // savings optional
     if (step === 4) return !!currentBalance;
+    if (step === 5) return !!goalAmount;
     return false;
   };
 
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   return (
     <div className="flex flex-col items-center px-5 py-6 gap-5">
@@ -246,6 +249,26 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           </div>
         )}
 
+        {step === 5 && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center gap-2 text-foreground">
+              <Trophy className="w-4 h-4 text-primary" />
+              <Label className="text-sm font-semibold">Qual é a sua meta atual?</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Quanto você quer alcançar de saldo? Vamos acompanhar seu progresso até lá!
+            </p>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={goalAmount}
+              onChange={(e) => handleCurrencyChange(setGoalAmount, e)}
+              className="h-10 bg-secondary border-border focus:border-primary text-sm"
+            />
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="flex gap-2 pt-2">
           {step > 0 && (
@@ -268,7 +291,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={saving}
+              disabled={saving || !canAdvance()}
               className="flex-1 h-10 bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-semibold text-sm"
             >
               {saving ? "Salvando..." : (

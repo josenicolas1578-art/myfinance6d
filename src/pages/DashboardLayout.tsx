@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Outlet, useLocation } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
@@ -13,6 +13,7 @@ const DashboardLayout = () => {
   const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isChatPage = location.pathname === "/dashboard/chat";
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const DashboardLayout = () => {
   const completeTutorial = () => {
     localStorage.setItem("myfinance_tutorial_done", "true");
     setShowTutorial(false);
+    navigate("/dashboard/perfil");
   };
 
   const { balanceFormatted } = useRealtimeBalance();
