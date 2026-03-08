@@ -3,8 +3,9 @@ import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
+import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import logoImg from "@/assets/logo.png";
-import { Menu, X, Instagram } from "lucide-react";
+import { Menu, X, Instagram, Wallet } from "lucide-react";
 
 const DashboardLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
