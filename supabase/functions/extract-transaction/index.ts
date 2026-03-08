@@ -34,18 +34,37 @@ serve(async (req) => {
 - "investimentos" para aportes, investimentos
 - "retornos" para lucros, rendimentos, ganhos, salários recebidos`;
 
-    const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras NOVAS mencionadas.
+    const extractPrompt = `Você é um extrator de transações financeiras extremamente preciso. Analise a mensagem do usuário e extraia TODAS as transações financeiras NOVAS.
 
 REGRAS CRÍTICAS:
 1. Extraia APENAS transações que JÁ ACONTECERAM (não futuras/projeções).
-2. NUNCA duplique: um investimento é APENAS "investimentos", NÃO é também "gastos". Gastos são despesas do dia a dia (comida, transporte, contas). Investimentos são aportes em ativos/negócios.
-3. NÃO re-extraia valores que o usuário está apenas mencionando como contexto/referência de transações anteriores. Extraia APENAS o que é NOVO nesta mensagem.
-4. Se o usuário menciona um retorno/ganho E o investimento original na mesma frase, extraia APENAS o retorno (o investimento já foi registrado antes).
+2. Cada transação pertence a UMA ÚNICA categoria. NUNCA duplique.
+3. NÃO re-extraia valores mencionados como contexto de transações anteriores.
+4. Se o usuário menciona retorno E investimento original na mesma frase, extraia APENAS o retorno.
 
-Categorias:
-- "gastos" → despesas, compras do dia a dia, contas, alimentação, transporte, serviços
-- "investimentos" → aportes em negócios, compra de ativos, máquinas para trabalho, ações, cripto
-- "retornos" → lucros, rendimentos, vendas, salários recebidos, retorno sobre investimento
+CLASSIFICAÇÃO POR PALAVRAS-CHAVE:
+
+"gastos" (dinheiro que SAIU para consumo pessoal):
+- "gastei", "paguei", "comprei" (roupas, comida, eletrônicos, presentes para outros)
+- "perdi" (perda de dinheiro)
+- "almocei", "jantei", "comi" (alimentação)
+- "assinei" (assinaturas, serviços)
+- "conta de", "boleto", "parcela"
+- Uber, mercado, farmácia, restaurante, lanche, roupa, camisa, tênis, celular
+
+"investimentos" (dinheiro aplicado com expectativa de RETORNO):
+- "investi", "apliquei", "aportei"
+- "comprei" + (ações, cripto, maquininha de cartão, equipamento para trabalho/negócio)
+- Ações, fundos, cripto, bitcoin, maquininha, equipamento profissional
+
+"retornos" (dinheiro que ENTROU):
+- "recebi", "ganhei", "me deram", "me pagaram"
+- "vendi" (venda de produto/serviço)
+- "entrou", "caiu na conta"
+- "salário", "freelance", "retorno", "lucro", "rendimento"
+- "ganhei de presente" (presente recebido em dinheiro)
+
+ATENÇÃO: "comprei uma camisa" = GASTO. "comprei ações" = INVESTIMENTO. O contexto da compra define a categoria!
 
 Mensagem do usuário: "${userMessage}"
 Resposta do assistente: "${assistantMessage}"
@@ -54,9 +73,16 @@ Retorne APENAS um JSON válido (sem markdown, sem texto extra). Se não houver t
 Formato: [{"amount": numero_positivo, "description": "descrição curta", "category": "gastos"|"investimentos"|"retornos"}]
 
 Exemplos:
+- "Comprei uma camisa de 240 reais" → [{"amount": 240, "description": "Camisa", "category": "gastos"}]
 - "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber", "category": "gastos"}]
-- "Investi 160 numa maquininha" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}] (NÃO adicionar como gasto!)
-- "Tive um retorno de 240 do investimento de 160" → [{"amount": 240, "description": "Retorno de investimento", "category": "retornos"}] (o 160 já foi registrado, NÃO re-extrair)
+- "Comprei um tênis de 350" → [{"amount": 350, "description": "Tênis", "category": "gastos"}]
+- "Perdi 50 reais" → [{"amount": 50, "description": "Perda", "category": "gastos"}]
+- "Investi 160 numa maquininha" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}]
+- "Comprei 500 em ações" → [{"amount": 500, "description": "Ações", "category": "investimentos"}]
+- "Recebi 1000 de salário" → [{"amount": 1000, "description": "Salário", "category": "retornos"}]
+- "Vendi um produto por 200" → [{"amount": 200, "description": "Venda de produto", "category": "retornos"}]
+- "Me deram 100 reais de presente" → [{"amount": 100, "description": "Presente recebido", "category": "retornos"}]
+- "Ganhei 50 reais" → [{"amount": 50, "description": "Ganho", "category": "retornos"}]
 - "Bom dia" → []`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
