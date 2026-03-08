@@ -27,6 +27,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
   const [fixedExpenses, setFixedExpenses] = useState("");
   const [financialGoal, setFinancialGoal] = useState<string | null>(null);
   const [savingsTarget, setSavingsTarget] = useState("");
+  const [currentBalance, setCurrentBalance] = useState("");
   const [saving, setSaving] = useState(false);
 
   const formatCurrency = (value: string) => {
@@ -66,6 +67,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           fixed_expenses: parseCurrency(fixedExpenses),
           financial_goal: financialGoal,
           savings_target: parseCurrency(savingsTarget),
+          current_balance: parseCurrency(currentBalance),
           form_completed: true,
         })
         .eq("user_id", userId);
@@ -85,10 +87,11 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
     if (step === 1) return !!fixedExpenses;
     if (step === 2) return !!financialGoal;
     if (step === 3) return true;
+    if (step === 4) return !!currentBalance;
     return false;
   };
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   return (
     <div className="flex flex-col items-center px-5 py-6 gap-5">
@@ -219,6 +222,24 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
               placeholder="R$ 0,00"
               value={savingsTarget}
               onChange={(e) => handleCurrencyChange(setSavingsTarget, e)}
+              className="h-10 bg-secondary border-border focus:border-primary text-sm"
+            />
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center gap-2 text-foreground">
+              <Wallet className="w-4 h-4 text-primary" />
+              <Label className="text-sm font-semibold">Quantos reais você tem na sua conta nesse exato momento?</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">Seja honesto — isso nos ajuda a te dar conselhos melhores.</p>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={currentBalance}
+              onChange={(e) => handleCurrencyChange(setCurrentBalance, e)}
               className="h-10 bg-secondary border-border focus:border-primary text-sm"
             />
           </div>

@@ -37,7 +37,7 @@ const PerfilPage = () => {
     setLoading(true);
     const { data } = await supabase
       .from("profiles")
-      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target")
+      .select("display_name, avatar_url, form_completed, salary_type, salary_amount, fixed_expenses, financial_goal, savings_target, current_balance")
       .eq("user_id", user!.id)
       .maybeSingle();
 
@@ -196,6 +196,16 @@ const PerfilPage = () => {
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">Meta de economia mensal</p>
                   <p className="text-sm font-medium text-foreground">{formatBRL(profileData.savings_target)}</p>
+                </div>
+              </div>
+            )}
+
+            {profileData.current_balance != null && (
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-secondary border border-border">
+                <DollarSign className="w-4 h-4 text-primary shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs text-muted-foreground">Saldo atual na conta</p>
+                  <p className="text-sm font-medium text-foreground">{formatBRL(profileData.current_balance)}</p>
                 </div>
               </div>
             )}
