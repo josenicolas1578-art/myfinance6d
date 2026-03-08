@@ -19,9 +19,13 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           display_name: string
+          financial_goal: string | null
+          fixed_expenses: number | null
+          form_completed: boolean
           id: string
           salary_amount: number | null
           salary_type: string | null
+          savings_target: number | null
           updated_at: string
           user_id: string
         }
@@ -29,9 +33,13 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name: string
+          financial_goal?: string | null
+          fixed_expenses?: number | null
+          form_completed?: boolean
           id?: string
           salary_amount?: number | null
           salary_type?: string | null
+          savings_target?: number | null
           updated_at?: string
           user_id: string
         }
@@ -39,9 +47,13 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           display_name?: string
+          financial_goal?: string | null
+          fixed_expenses?: number | null
+          form_completed?: boolean
           id?: string
           salary_amount?: number | null
           salary_type?: string | null
+          savings_target?: number | null
           updated_at?: string
           user_id?: string
         }
