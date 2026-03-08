@@ -567,6 +567,19 @@ const GraficosPage = () => {
           </div>
         </div>
       )}
+      {/* Refresh button - bottom right above footer */}
+      <button
+        onClick={async () => {
+          setRefreshing(true);
+          await fetchTransactions();
+          await fetchDailyLimit();
+          setRefreshing(false);
+          toast.success("Dados atualizados!");
+        }}
+        className="fixed bottom-20 right-4 z-40 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/30 neon-glow hover:bg-primary/90 transition-all"
+      >
+        <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
+      </button>
     </div>
   );
 };
