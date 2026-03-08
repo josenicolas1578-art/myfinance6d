@@ -572,6 +572,58 @@ const PerfilPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Goal celebration dialog */}
+      <Dialog open={celebrationOpen} onOpenChange={setCelebrationOpen}>
+        <DialogContent className="max-w-xs border-primary/40 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+          <div className="relative flex flex-col items-center text-center gap-5 py-4">
+            {/* Animated icon */}
+            <div className="relative">
+              <div className="w-20 h-20 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center neon-glow animate-scale-in">
+                <PartyPopper className="w-10 h-10 text-primary" />
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-accent flex items-center justify-center animate-bounce">
+                <Sparkles className="w-3.5 h-3.5 text-accent-foreground" />
+              </div>
+            </div>
+
+            <div className="space-y-2 animate-fade-in">
+              <h2 className="text-xl font-heading font-black text-foreground">
+                🎉 Parabéns!
+              </h2>
+              <p className="text-sm text-foreground font-medium">
+                Você atingiu sua meta de{" "}
+                <span className="text-primary font-bold neon-text">
+                  {formatBRL(profileData?.goal_amount)}
+                </span>
+              </p>
+            </div>
+
+            <div className="px-3 py-3 rounded-xl bg-secondary/60 border border-border animate-fade-in">
+              <p className="text-sm text-muted-foreground leading-relaxed italic">
+                "{celebrationMsg}"
+              </p>
+            </div>
+
+            <p className="text-xs text-muted-foreground animate-fade-in">
+              Vamos sonhar mais alto? Defina uma nova meta!
+            </p>
+
+            <Button
+              onClick={() => {
+                setCelebrationOpen(false);
+                setGoalInput("");
+                setGoalModalOpen(true);
+              }}
+              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow font-bold text-sm animate-fade-in"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Definir Nova Meta
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
