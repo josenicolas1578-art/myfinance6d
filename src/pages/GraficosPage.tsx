@@ -2,7 +2,18 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingDown, TrendingUp, BarChart3 } from "lucide-react";
+import { TrendingDown, TrendingUp, BarChart3, ShieldAlert } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type Period = "hoje" | "7dias" | "mes";
 type Category = "gastos" | "investimentos" | "retornos";
@@ -28,15 +39,47 @@ const CATEGORY_CONFIG: Record<Category, { label: string; color: string; icon: ty
 const formatBRL = (value: number) =>
   value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+const formatCurrencyInput = (value: string) => {
+  const nums = value.replace(/\D/g, "");
+  const amount = parseInt(nums || "0", 10) / 100;
+  return amount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+};
+
+const parseCurrency = (value: string) => {
+  if (!value) return null;
+  const cleaned = value.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".");
+  return parseFloat(cleaned) || null;
+};
+
 const GraficosPage = () => {
   const { user } = useAuth();
   const [period, setPeriod] = useState<Period>("mes");
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Daily limit state
+  const [dailyLimit, setDailyLimit] = useState<number | null>(null);
+  const [showLimitForm, setShowLimitForm] = useState(false);
+  const [limitInput, setLimitInput] = useState("");
+  const [savingLimit, setSavingLimit] = useState(false);
+  const [limitExceededOpen, setLimitExceededOpen] = useState(false);
+  const [todaySpending, setTodaySpending] = useState(0);
+
   useEffect(() => {
-    if (user) fetchTransactions();
+    if (user) {
+      fetchTransactions();
+      fetchDailyLimit();
+    }
   }, [user, period]);
+
+  const fetchDailyLimit = async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("daily_spending_limit")
+      .eq("user_id", user!.id)
+      .maybeSingle();
+    setDailyLimit((data as any)?.daily_spending_limit ?? null);
+  };
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -60,8 +103,41 @@ const GraficosPage = () => {
       .gte("transaction_date", startDate)
       .order("transaction_date", { ascending: true });
 
-    setTransactions((data as Transaction[]) || []);
+    const txns = (data as Transaction[]) || [];
+    setTransactions(txns);
     setLoading(false);
+
+    // Check daily limit
+    const today = new Date().toISOString().split("T")[0];
+    const todayGastos = txns
+      .filter((t) => t.category === "gastos" && t.transaction_date === today)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+    setTodaySpending(todayGastos);
+  };
+
+  // Check if limit exceeded whenever todaySpending or dailyLimit changes
+  useEffect(() => {
+    if (dailyLimit && todaySpending > dailyLimit) {
+      setLimitExceededOpen(true);
+    }
+  }, [todaySpending, dailyLimit]);
+
+  const saveDailyLimit = async () => {
+    setSavingLimit(true);
+    const val = parseCurrency(limitInput);
+    const { error } = await supabase
+      .from("profiles")
+      .update({ daily_spending_limit: val } as any)
+      .eq("user_id", user!.id);
+    if (error) {
+      toast.error("Erro ao salvar limite");
+    } else {
+      setDailyLimit(val);
+      toast.success(val ? `Limite diário definido: ${formatBRL(val)}` : "Limite diário removido");
+      setShowLimitForm(false);
+      setLimitInput("");
+    }
+    setSavingLimit(false);
   };
 
   const buildChartData = (category: Category) => {
@@ -69,7 +145,6 @@ const GraficosPage = () => {
     const filtered = transactions.filter((t) => t.category === category);
     const dateMap: Record<string, number> = {};
 
-    // Initialize all dates in range
     if (period === "hoje") {
       const key = now.toISOString().split("T")[0];
       dateMap[key] = 0;
@@ -83,7 +158,6 @@ const GraficosPage = () => {
       }
     }
 
-    // Sum amounts per day
     filtered.forEach((t) => {
       if (dateMap[t.transaction_date] !== undefined) {
         dateMap[t.transaction_date] += Number(t.amount);
@@ -127,6 +201,70 @@ const GraficosPage = () => {
             {PERIOD_LABELS[p]}
           </button>
         ))}
+      </div>
+
+      {/* Daily limit button */}
+      <div className="space-y-2">
+        <button
+          onClick={() => {
+            setShowLimitForm(!showLimitForm);
+            if (!showLimitForm && dailyLimit) {
+              setLimitInput(formatBRL(dailyLimit));
+            }
+          }}
+          className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-border bg-card hover:border-primary/40 transition-all"
+        >
+          <div className="flex items-center gap-2">
+            <ShieldAlert className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-foreground">Programar limite diário</span>
+          </div>
+          {dailyLimit ? (
+            <span className="text-xs font-semibold text-primary">{formatBRL(dailyLimit)}</span>
+          ) : (
+            <span className="text-xs text-muted-foreground">Não definido</span>
+          )}
+        </button>
+
+        {showLimitForm && (
+          <div className="flex items-center gap-2 px-2">
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={limitInput}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, "");
+                if (raw.length <= 12) setLimitInput(raw ? formatCurrencyInput(raw) : "");
+              }}
+              className="h-9 text-sm bg-secondary border-border"
+              autoFocus
+            />
+            <button
+              onClick={saveDailyLimit}
+              disabled={savingLimit}
+              className="px-4 h-9 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-all"
+            >
+              Salvar
+            </button>
+            {dailyLimit && (
+              <button
+                onClick={async () => {
+                  await supabase
+                    .from("profiles")
+                    .update({ daily_spending_limit: null } as any)
+                    .eq("user_id", user!.id);
+                  setDailyLimit(null);
+                  setShowLimitForm(false);
+                  setLimitInput("");
+                  toast.success("Limite diário removido");
+                }}
+                className="px-3 h-9 rounded-lg bg-destructive/10 text-destructive text-sm font-medium hover:bg-destructive/20 transition-all"
+              >
+                Remover
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -202,6 +340,29 @@ const GraficosPage = () => {
           );
         })
       )}
+
+      {/* Daily limit exceeded alert */}
+      <AlertDialog open={limitExceededOpen} onOpenChange={setLimitExceededOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <ShieldAlert className="w-5 h-5" />
+              Limite diário atingido!
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Você gastou <strong className="text-destructive">{formatBRL(todaySpending)}</strong> hoje, ultrapassando seu limite diário de <strong>{dailyLimit ? formatBRL(dailyLimit) : "—"}</strong>.
+              </p>
+              <p>
+                Manter o controle dos seus gastos é essencial para a sua saúde financeira. Tente evitar novos gastos hoje para manter suas finanças no caminho certo.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>Entendi</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
