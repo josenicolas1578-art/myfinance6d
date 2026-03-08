@@ -10,7 +10,19 @@ const DashboardLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
+  const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
+  const isChatPage = location.pathname === "/dashboard/chat";
+
+  useEffect(() => {
+    const seen = localStorage.getItem("myfinance_tutorial_done");
+    if (!seen) setShowTutorial(true);
+  }, []);
+
+  const completeTutorial = () => {
+    localStorage.setItem("myfinance_tutorial_done", "true");
+    setShowTutorial(false);
+  };
   const isChatPage = location.pathname === "/dashboard/chat";
 
   return (
