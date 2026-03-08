@@ -203,8 +203,6 @@ const GraficosPage = () => {
         result[t.category as Category] += Number(t.amount);
       }
     });
-    // Gastos includes investimentos (investments are also expenses)
-    result.gastos += result.investimentos;
     return result;
   }, [transactions]);
 
