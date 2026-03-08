@@ -92,6 +92,7 @@ const Auth = () => {
               <img src={logoImg} alt="My Finance Logo" className="w-14 h-14 object-contain" />
             </div>
             <span className="text-xl font-heading font-bold text-primary neon-text">My Finance</span>
+            <span className="text-xs text-muted-foreground">Controle inteligente das suas finanças pessoais</span>
           </div>
 
           {/* Card */}
