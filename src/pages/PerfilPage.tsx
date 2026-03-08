@@ -313,7 +313,7 @@ const PerfilPage = () => {
           <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
           <div className="space-y-2">
             {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", formatBRL(profileData.current_balance), true)}
-            {renderFieldCard("salary_type", <Wallet className="w-4 h-4 text-primary" />, "Tipo de renda", profileData.salary_type === "fixo" ? "Renda Fixa" : "Renda Variável")}
+            
             {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", formatBRL(profileData.salary_amount))}
             {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", formatBRL(profileData.fixed_expenses))}
             {renderFieldCard("financial_goal", <Target className="w-4 h-4 text-primary" />, "Objetivo financeiro", GOAL_LABELS[profileData.financial_goal] || profileData.financial_goal || "—")}
