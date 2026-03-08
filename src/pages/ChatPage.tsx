@@ -78,6 +78,8 @@ async function streamChat({
   onDone();
 }
 
+const EXTRACT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-transaction`;
+
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
   const { user } = useAuth();
