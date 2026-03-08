@@ -72,7 +72,7 @@ const DashboardLayout = () => {
                   Criado e programado por
                 </p>
                 <a
-                  href="https://instagram.com/nicolas.nzk"
+                  href="https://www.instagram.com/nicolas.nzk?igsh=MTJ0OWt4OWN6NGZ1Mw%3D%3D&utm_source=qr"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary border border-border text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
