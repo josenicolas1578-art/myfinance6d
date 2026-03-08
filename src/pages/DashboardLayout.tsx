@@ -61,12 +61,12 @@ const DashboardLayout = () => {
       <div className="flex flex-col flex-1 min-h-[100dvh] lg:ml-56">
         {/* Header */}
         <header className="border-b border-border bg-card px-4" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-          <div className="flex items-center justify-between h-14 max-w-4xl mx-auto w-full">
+          <div className="flex items-center justify-between h-14 w-full">
             <div className="flex items-center gap-2">
               {isChatPage && (
                 <button
                   onClick={() => setMenuOpen(true)}
-                  className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors lg:hidden"
+                  className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
                 >
                   <Menu className="w-6 h-6" />
                 </button>
@@ -79,19 +79,9 @@ const DashboardLayout = () => {
 
             <button
               onClick={() => setAboutOpen(true)}
-              className="flex items-center gap-2 hover:opacity-80 transition-opacity lg:hidden"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
               <span className="text-base font-heading font-bold text-primary neon-text">My Finance</span>
-              <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30 flex items-center justify-center bg-background">
-                <img src={appIcon} alt="My Finance" className="w-5 h-5 object-contain" />
-              </div>
-            </button>
-
-            {/* Desktop: about button only */}
-            <button
-              onClick={() => setAboutOpen(true)}
-              className="hidden lg:flex items-center gap-2 hover:opacity-80 transition-opacity"
-            >
               <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30 flex items-center justify-center bg-background">
                 <img src={appIcon} alt="My Finance" className="w-5 h-5 object-contain" />
               </div>
