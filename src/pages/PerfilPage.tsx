@@ -121,6 +121,21 @@ const PerfilPage = () => {
     if (user) fetchProfile();
   }, [user]);
 
+  // Detect goal achievement
+  useEffect(() => {
+    if (!profileData || !user) return;
+    const goal = profileData.goal_amount ?? 0;
+    const balance = profileData.current_balance ?? 0;
+    if (goal > 0 && balance >= goal) {
+      const celebratedKey = `myfinance_celebrated_${user.id}_${goal}`;
+      if (!localStorage.getItem(celebratedKey)) {
+        localStorage.setItem(celebratedKey, "true");
+        setCelebrationMsg(getRandomMotivation());
+        setCelebrationOpen(true);
+      }
+    }
+  }, [profileData, user]);
+
   const fetchProfile = async () => {
     setLoading(true);
     const { data } = await supabase
