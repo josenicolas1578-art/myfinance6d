@@ -34,25 +34,29 @@ serve(async (req) => {
 - "investimentos" para aportes, investimentos
 - "retornos" para lucros, rendimentos, ganhos, salários recebidos`;
 
-    const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras mencionadas.
+    const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras NOVAS mencionadas.
 
-IMPORTANTE: Extraia APENAS transações que JÁ ACONTECERAM. Valores futuros, previsões, expectativas de retorno ou projeções NÃO devem ser extraídos.
+REGRAS CRÍTICAS:
+1. Extraia APENAS transações que JÁ ACONTECERAM (não futuras/projeções).
+2. NUNCA duplique: um investimento é APENAS "investimentos", NÃO é também "gastos". Gastos são despesas do dia a dia (comida, transporte, contas). Investimentos são aportes em ativos/negócios.
+3. NÃO re-extraia valores que o usuário está apenas mencionando como contexto/referência de transações anteriores. Extraia APENAS o que é NOVO nesta mensagem.
+4. Se o usuário menciona um retorno/ganho E o investimento original na mesma frase, extraia APENAS o retorno (o investimento já foi registrado antes).
 
-${categoryInstruction}
+Categorias:
+- "gastos" → despesas, compras do dia a dia, contas, alimentação, transporte, serviços
+- "investimentos" → aportes em negócios, compra de ativos, máquinas para trabalho, ações, cripto
+- "retornos" → lucros, rendimentos, vendas, salários recebidos, retorno sobre investimento
 
 Mensagem do usuário: "${userMessage}"
 Resposta do assistente: "${assistantMessage}"
 
-Retorne APENAS um JSON válido (sem markdown, sem texto extra). Se não houver transação, retorne [].
+Retorne APENAS um JSON válido (sem markdown, sem texto extra). Se não houver transação NOVA, retorne [].
 Formato: [{"amount": numero_positivo, "description": "descrição curta", "category": "gastos"|"investimentos"|"retornos"}]
 
 Exemplos:
 - "Gastei 9 reais com uber" → [{"amount": 9, "description": "Uber", "category": "gastos"}]
-- "Fui no mercado e gastei 12 reais com lanche" → [{"amount": 12, "description": "Lanche no mercado", "category": "gastos"}]
-- "Investi 500 reais em ações" → [{"amount": 500, "description": "Ações", "category": "investimentos"}]
-- "Tive um retorno de 200 reais" → [{"amount": 200, "description": "Retorno de investimento", "category": "retornos"}]
-- "Investi 160 numa maquininha que vai retornar 240 mês que vem" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}] (o 240 é futuro, NÃO extrair)
-- "Vou receber 1000 semana que vem" → [] (ainda não aconteceu)
+- "Investi 160 numa maquininha" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}] (NÃO adicionar como gasto!)
+- "Tive um retorno de 240 do investimento de 160" → [{"amount": 240, "description": "Retorno de investimento", "category": "retornos"}] (o 160 já foi registrado, NÃO re-extrair)
 - "Bom dia" → []`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
