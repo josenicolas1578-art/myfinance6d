@@ -24,7 +24,7 @@ const DashboardLayout = () => {
   const completeTutorial = () => {
     localStorage.setItem("myfinance_tutorial_done", "true");
     setShowTutorial(false);
-    navigate("/dashboard/perfil");
+    navigate("/dashboard/chat");
   };
 
   const { balanceFormatted } = useRealtimeBalance();

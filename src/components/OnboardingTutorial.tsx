@@ -113,7 +113,7 @@ const OnboardingTutorial = ({ onComplete }: OnboardingTutorialProps) => {
                 : "bg-primary text-primary-foreground hover:bg-primary/90 neon-glow"
             }`}
           >
-            {isLast ? "Ir para o Perfil" : (
+            {isLast ? "Começar" : (
               <>
                 Próximo
                 <ArrowRight className="w-4 h-4 ml-1" />
