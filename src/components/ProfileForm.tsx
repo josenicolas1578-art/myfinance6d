@@ -87,10 +87,11 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
     if (step === 1) return !!fixedExpenses;
     if (step === 2) return !!financialGoal;
     if (step === 3) return true;
+    if (step === 4) return !!currentBalance;
     return false;
   };
 
-  const totalSteps = 4;
+  const totalSteps = 5;
 
   return (
     <div className="flex flex-col items-center px-5 py-6 gap-5">
