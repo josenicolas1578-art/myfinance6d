@@ -227,6 +227,24 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
           </div>
         )}
 
+        {step === 4 && (
+          <div className="space-y-4 animate-fade-in">
+            <div className="flex items-center gap-2 text-foreground">
+              <Wallet className="w-4 h-4 text-primary" />
+              <Label className="text-sm font-semibold">Quantos reais você tem na sua conta nesse exato momento?</Label>
+            </div>
+            <p className="text-xs text-muted-foreground">Seja honesto — isso nos ajuda a te dar conselhos melhores.</p>
+            <Input
+              type="text"
+              inputMode="numeric"
+              placeholder="R$ 0,00"
+              value={currentBalance}
+              onChange={(e) => handleCurrencyChange(setCurrentBalance, e)}
+              className="h-10 bg-secondary border-border focus:border-primary text-sm"
+            />
+          </div>
+        )}
+
         {/* Navigation */}
         <div className="flex gap-2 pt-2">
           {step > 0 && (
