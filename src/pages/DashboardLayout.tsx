@@ -5,6 +5,7 @@ import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import logoImg from "@/assets/logo.png";
 import { Menu, X, Instagram, Wallet } from "lucide-react";
 
@@ -20,13 +21,32 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     if (!user) return;
-    const key = `myfinance_tutorial_done_${user.id}`;
-    const seen = localStorage.getItem(key);
-    if (!seen) setShowTutorial(true);
+    // Check if tutorial was already completed via profiles table
+    const checkTutorial = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("form_completed")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      // Only show tutorial if profile doesn't exist yet or form not completed
+      if (!data || !data.form_completed) {
+        const key = `myfinance_tutorial_done_${user.id}`;
+        const seen = localStorage.getItem(key);
+        if (!seen) setShowTutorial(true);
+      }
+    };
+    checkTutorial();
   }, [user]);
 
-  const completeTutorial = () => {
-    if (user) localStorage.setItem(`myfinance_tutorial_done_${user.id}`, "true");
+  const completeTutorial = async () => {
+    if (user) {
+      localStorage.setItem(`myfinance_tutorial_done_${user.id}`, "true");
+      // Also mark in the database so it persists across devices/sessions
+      await supabase
+        .from("profiles")
+        .update({ form_completed: true })
+        .eq("user_id", user.id);
+    }
     setShowTutorial(false);
     navigate("/dashboard/chat");
   };
