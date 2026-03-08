@@ -23,16 +23,9 @@ const DashboardLayout = () => {
   useEffect(() => {
     if (!user) return;
     const checkTutorial = async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("form_completed")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (!data || !data.form_completed) {
-        const key = `myfinance_tutorial_done_${user.id}`;
-        const seen = localStorage.getItem(key);
-        if (!seen) setShowTutorial(true);
-      }
+      const key = `myfinance_tutorial_done_${user.id}`;
+      const seen = localStorage.getItem(key);
+      if (!seen) setShowTutorial(true);
     };
     checkTutorial();
   }, [user]);
@@ -40,10 +33,6 @@ const DashboardLayout = () => {
   const completeTutorial = async () => {
     if (user) {
       localStorage.setItem(`myfinance_tutorial_done_${user.id}`, "true");
-      await supabase
-        .from("profiles")
-        .update({ form_completed: true })
-        .eq("user_id", user.id);
     }
     setShowTutorial(false);
     navigate("/dashboard/chat");
