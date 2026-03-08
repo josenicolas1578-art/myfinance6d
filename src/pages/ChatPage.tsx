@@ -176,8 +176,7 @@ const ChatPage = () => {
   };
 
   const extractTransactions = async (userMsg: string, aiMsg: string, topic: string) => {
-    // Only extract for built-in financial topics
-    if (!["gastos", "investimentos", "retornos"].includes(topic)) return;
+    // Extract for built-in financial topics and custom agents
     try {
       const session = (await supabase.auth.getSession()).data.session;
       if (!session) return;
