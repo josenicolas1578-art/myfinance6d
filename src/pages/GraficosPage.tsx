@@ -163,10 +163,8 @@ const GraficosPage = () => {
 
   const buildChartData = (category: Category) => {
     const now = new Date();
-    // Gastos chart includes investimentos too (investments are also expenses)
-    const filtered = category === "gastos"
-      ? transactions.filter((t) => t.category === "gastos" || t.category === "investimentos")
-      : transactions.filter((t) => t.category === category);
+    // Each category shows ONLY its own transactions - no mixing
+    const filtered = transactions.filter((t) => t.category === category);
     const dateMap: Record<string, number> = {};
 
     if (period === "hoje") {
@@ -205,19 +203,13 @@ const GraficosPage = () => {
         result[t.category as Category] += Number(t.amount);
       }
     });
-    // Gastos includes investimentos (investments are also expenses)
-    result.gastos += result.investimentos;
     return result;
   }, [transactions]);
 
   // Get detail transactions for the selected category
   const detailTransactions = useMemo(() => {
     if (!detailCategory) return [];
-    if (detailCategory === "gastos") {
-      return transactions.filter((t) => t.category === "gastos" || t.category === "investimentos");
-    }
     if (detailCategory === "geral") {
-      // Show all unique transactions (don't double-count)
       return transactions;
     }
     return transactions.filter((t) => t.category === detailCategory);
