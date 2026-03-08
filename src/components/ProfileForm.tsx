@@ -48,7 +48,8 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
 
   const parseCurrency = (value: string) => {
     if (!value) return null;
-    return parseFloat(value.replace(/[^\d,.-]/g, "").replace(",", ".")) || null;
+    const cleaned = value.replace(/[^\d,.-]/g, "").replace(/\./g, "").replace(",", ".");
+    return parseFloat(cleaned) || null;
   };
 
   const handleSubmit = async () => {
