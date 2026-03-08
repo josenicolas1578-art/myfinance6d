@@ -95,10 +95,10 @@ Exemplos:
 
     // Insert transactions
     const rows = transactions
-      .filter((t) => t.amount > 0)
-      .map((t) => ({
+      .filter((t: any) => t.amount > 0)
+      .map((t: any) => ({
         user_id: user.id,
-        category: topic,
+        category: isCustomAgent ? (t.category || "gastos") : topic,
         amount: t.amount,
         description: t.description || null,
         transaction_date: new Date().toISOString().split("T")[0],
@@ -109,9 +109,6 @@ Exemplos:
       if (insertError) console.error("Insert error:", insertError);
 
       // Update current_balance on profile
-      // gastos → subtract, retornos → add, investimentos → subtract (money going out)
-      const totalAmount = rows.reduce((sum, r) => sum + r.amount, 0);
-
       const { data: profile } = await supabase
         .from("profiles")
         .select("current_balance")
@@ -120,18 +117,19 @@ Exemplos:
 
       if (profile) {
         const currentBalance = profile.current_balance ?? 0;
-        let newBalance: number;
+        let balanceChange = 0;
 
-        if (topic === "retornos") {
-          newBalance = currentBalance + totalAmount;
-        } else {
-          // gastos and investimentos subtract from balance
-          newBalance = currentBalance - totalAmount;
+        for (const r of rows) {
+          if (r.category === "retornos") {
+            balanceChange += r.amount;
+          } else {
+            balanceChange -= r.amount;
+          }
         }
 
         const { error: updateError } = await supabase
           .from("profiles")
-          .update({ current_balance: newBalance })
+          .update({ current_balance: currentBalance + balanceChange })
           .eq("user_id", user.id);
 
         if (updateError) console.error("Balance update error:", updateError);
