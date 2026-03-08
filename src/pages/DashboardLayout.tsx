@@ -57,7 +57,7 @@ const DashboardLayout = () => {
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
       {showTutorial && <OnboardingTutorial onComplete={completeTutorial} />}
-      <header className="border-b border-border bg-card px-4">
+      <header className="border-b border-border bg-card px-4" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
           <div className="flex items-center gap-2">
             {isChatPage && (
