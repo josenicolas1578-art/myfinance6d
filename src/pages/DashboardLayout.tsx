@@ -13,6 +13,7 @@ const DashboardLayout = () => {
   const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const isChatPage = location.pathname === "/dashboard/chat";
 
   useEffect(() => {
