@@ -44,7 +44,7 @@ const DashboardLayout = () => {
     <div className="flex min-h-[100dvh] bg-background">
       {showTutorial && <OnboardingTutorial onComplete={completeTutorial} />}
 
-      <BottomNav />
+      <BottomNav onAboutClick={() => setAboutOpen(true)} />
 
       {/* Main content area - offset on desktop for sidebar */}
       <div className="flex flex-col flex-1 min-h-[100dvh] lg:ml-56">
