@@ -40,9 +40,7 @@ interface SideMenuProps {
 }
 
 const builtInTopics = [
-  { id: "gastos", label: "Gastos", icon: DollarSign, description: "Controle de despesas e gastos" },
-  { id: "investimentos", label: "Investimentos", icon: TrendingUp, description: "Dicas e análise de investimentos" },
-  { id: "retornos", label: "Retornos / Ganhos", icon: RotateCcw, description: "Acompanhamento de retornos e ganhos" },
+  { id: "geral", label: "Gestor Geral", icon: MessageCircle, description: "Gastos, investimentos e ganhos" },
 ];
 
 const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) => {
