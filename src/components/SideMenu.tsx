@@ -86,10 +86,35 @@ const SideMenu = ({ open, onClose, activeTopic, onSelectTopic }: SideMenuProps) 
   const createAgent = async () => {
     if (!agentName.trim() || !user) return;
     setCreating(true);
+
+    // Generate short description via AI
+    let shortDesc = agentDesc.trim() ? `Gestor ${agentName.trim()}` : "";
+    if (agentDesc.trim()) {
+      try {
+        const resp = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-agent-description`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            },
+            body: JSON.stringify({ name: agentName.trim(), userDescription: agentDesc.trim() }),
+          }
+        );
+        if (resp.ok) {
+          const data = await resp.json();
+          shortDesc = data.description || shortDesc;
+        }
+      } catch {
+        // fallback to default
+      }
+    }
+
     const { error } = await supabase.from("custom_agents").insert({
       user_id: user.id,
       name: agentName.trim(),
-      description: agentDesc.trim(),
+      description: shortDesc,
     });
     if (error) {
       toast.error("Erro ao criar gestor");
