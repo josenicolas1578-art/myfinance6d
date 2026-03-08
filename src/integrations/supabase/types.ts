@@ -75,6 +75,7 @@ export type Database = {
           financial_goal: string | null
           fixed_expenses: number | null
           form_completed: boolean
+          goal_amount: number | null
           id: string
           salary_amount: number | null
           salary_type: string | null
@@ -91,6 +92,7 @@ export type Database = {
           financial_goal?: string | null
           fixed_expenses?: number | null
           form_completed?: boolean
+          goal_amount?: number | null
           id?: string
           salary_amount?: number | null
           salary_type?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           financial_goal?: string | null
           fixed_expenses?: number | null
           form_completed?: boolean
+          goal_amount?: number | null
           id?: string
           salary_amount?: number | null
           salary_type?: string | null

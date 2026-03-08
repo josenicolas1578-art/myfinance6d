@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN goal_amount numeric NULL DEFAULT NULL;
