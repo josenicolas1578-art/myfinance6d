@@ -112,6 +112,23 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  const extractTransactions = async (userMsg: string, aiMsg: string, topic: ChatTopic) => {
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) return;
+      await fetch(EXTRACT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ userMessage: userMsg, assistantMessage: aiMsg, topic }),
+      });
+    } catch (e) {
+      console.error("extract error:", e);
+    }
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || isLoading) return;
