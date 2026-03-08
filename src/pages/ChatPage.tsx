@@ -264,9 +264,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex flex-col" style={{ height: "calc(100dvh - 56px - 64px)" }}>
-      {/* Desktop: remove bottom nav offset */}
-      <style>{`@media (min-width: 1024px) { .chat-container { height: calc(100dvh - 56px) !important; } }`}</style>
+    <div className="flex flex-col h-[calc(100dvh-56px-64px)] lg:h-[calc(100dvh-56px)]">
       {/* Topic banner */}
       <div className="px-4 py-2 bg-secondary/50 border-b border-border text-center">
         <p className="text-xs text-muted-foreground">
