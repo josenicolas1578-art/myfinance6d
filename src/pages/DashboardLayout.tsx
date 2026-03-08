@@ -33,15 +33,13 @@ const DashboardLayout = () => {
       <header className="border-b border-border bg-card px-4">
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
           <div className="flex items-center gap-2">
-            {isChatPage ? (
+            {isChatPage && (
               <button
                 onClick={() => setMenuOpen(true)}
                 className="w-10 h-10 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
               >
                 <Menu className="w-6 h-6" />
               </button>
-            ) : (
-              <div className="w-10" />
             )}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20">
               <Wallet className="w-3.5 h-3.5 text-primary" />

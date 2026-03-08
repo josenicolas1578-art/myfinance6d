@@ -3,9 +3,19 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign } from "lucide-react";
+import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const GOAL_LABELS: Record<string, string> = {
   economizar: "Economizar dinheiro",
@@ -48,6 +58,7 @@ const PerfilPage = () => {
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingForm, setEditingForm] = useState(false);
+  const [balanceConfirmOpen, setBalanceConfirmOpen] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -81,6 +92,15 @@ const PerfilPage = () => {
   };
 
   const startEdit = (field: EditableField) => {
+    if (!field || !profileData) return;
+    if (field === "current_balance") {
+      setBalanceConfirmOpen(true);
+      return;
+    }
+    openFieldEditor(field);
+  };
+
+  const openFieldEditor = (field: EditableField) => {
     if (!field || !profileData) return;
     if (field === "financial_goal") {
       setEditValue(profileData.financial_goal || "");
@@ -313,6 +333,29 @@ const PerfilPage = () => {
           Sair da conta
         </Button>
       </div>
+
+      <AlertDialog open={balanceConfirmOpen} onOpenChange={setBalanceConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+              Alterar saldo manualmente?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Alterar o saldo manualmente pode desconfigurar o acompanhamento dos seus gastos e retornos, prejudicando a análise e o progresso registrados pelo aplicativo. Tem certeza que deseja continuar?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => openFieldEditor("current_balance")}
+            >
+              Sim, alterar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

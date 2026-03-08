@@ -14,11 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          topic: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role: string
+          topic: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          topic?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           created_at: string
           current_balance: number | null
+          daily_spending_limit: number | null
           display_name: string
           financial_goal: string | null
           fixed_expenses: number | null
@@ -34,6 +62,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           current_balance?: number | null
+          daily_spending_limit?: number | null
           display_name: string
           financial_goal?: string | null
           fixed_expenses?: number | null
@@ -49,6 +78,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           current_balance?: number | null
+          daily_spending_limit?: number | null
           display_name?: string
           financial_goal?: string | null
           fixed_expenses?: number | null
