@@ -67,11 +67,30 @@ const GraficosPage = () => {
   const [limitExceededOpen, setLimitExceededOpen] = useState(false);
   const [todaySpending, setTodaySpending] = useState(0);
 
+  const [refreshing, setRefreshing] = useState(false);
+
   useEffect(() => {
     if (user) {
       fetchTransactions();
       fetchDailyLimit();
     }
+  }, [user, period]);
+
+  // Realtime subscription for transactions
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel('transactions-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.id}` },
+        () => {
+          fetchTransactions();
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [user, period]);
 
   const fetchDailyLimit = async () => {
