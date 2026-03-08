@@ -78,6 +78,8 @@ async function streamChat({
   onDone();
 }
 
+const EXTRACT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-transaction`;
+
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
   const { user } = useAuth();
@@ -109,6 +111,23 @@ const ChatPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const extractTransactions = async (userMsg: string, aiMsg: string, topic: ChatTopic) => {
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) return;
+      await fetch(EXTRACT_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ userMessage: userMsg, assistantMessage: aiMsg, topic }),
+      });
+    } catch (e) {
+      console.error("extract error:", e);
+    }
+  };
 
   const send = async () => {
     const text = input.trim();
@@ -150,7 +169,11 @@ const ChatPage = () => {
         messages: allMessages,
         topic: chatTopic,
         onDelta: upsertAssistant,
-        onDone: () => setIsLoading(false),
+        onDone: () => {
+          setIsLoading(false);
+          // Extract transactions in background
+          extractTransactions(text, assistantSoFar, chatTopic);
+        },
       });
     } catch (e: any) {
       toast.error(e.message || "Erro ao enviar mensagem");
