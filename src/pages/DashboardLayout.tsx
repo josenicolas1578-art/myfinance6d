@@ -41,7 +41,7 @@ const DashboardLayout = () => {
   const { balanceFormatted } = useRealtimeBalance();
 
   return (
-    <div className={`flex bg-background ${isChatPage ? 'h-[100dvh] overflow-hidden' : 'min-h-[100dvh]'}`}>
+    <div className="flex bg-background h-[100dvh] overflow-hidden">
       {showTutorial && <OnboardingTutorial onComplete={completeTutorial} />}
 
       <BottomNav onAboutClick={() => setAboutOpen(true)} />
