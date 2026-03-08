@@ -520,7 +520,7 @@ const GraficosPage = () => {
                 <X className="w-4 h-4 text-muted-foreground" />
               </button>
             </div>
-            <div className="overflow-y-auto flex-1 p-4 space-y-2 overscroll-contain touch-pan-y">
+            <div className="overflow-y-auto flex-1 min-h-0 p-4 space-y-2 overscroll-contain touch-pan-y pb-24" style={{ WebkitOverflowScrolling: "touch" }}>
               {detailTransactions.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-8">Nenhuma transação no período</p>
               ) : (
