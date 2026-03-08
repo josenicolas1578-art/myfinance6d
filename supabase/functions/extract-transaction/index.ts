@@ -39,6 +39,8 @@ serve(async (req) => {
 
     const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras mencionadas.
 
+IMPORTANTE: Extraia APENAS transações que JÁ ACONTECERAM. Valores futuros, previsões, expectativas de retorno ou projeções NÃO devem ser extraídos.
+
 ${categoryInstruction}
 
 Mensagem do usuário: "${userMessage}"
@@ -52,6 +54,8 @@ Exemplos:
 - "Fui no mercado e gastei 12 reais com lanche" → [{"amount": 12, "description": "Lanche no mercado", "category": "gastos"}]
 - "Investi 500 reais em ações" → [{"amount": 500, "description": "Ações", "category": "investimentos"}]
 - "Tive um retorno de 200 reais" → [{"amount": 200, "description": "Retorno de investimento", "category": "retornos"}]
+- "Investi 160 numa maquininha que vai retornar 240 mês que vem" → [{"amount": 160, "description": "Maquininha", "category": "investimentos"}] (o 240 é futuro, NÃO extrair)
+- "Vou receber 1000 semana que vem" → [] (ainda não aconteceu)
 - "Bom dia" → []`;
 
     const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
