@@ -143,7 +143,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
                     : "border-border bg-secondary text-muted-foreground hover:border-primary/50"
                 }`}
               >
-                Variável / PJ
+                Renda Variável
               </button>
             </div>
             {salaryType === "fixo" && (
