@@ -79,7 +79,7 @@ const DashboardLayout = () => {
           >
             <span className="text-base font-heading font-bold text-primary neon-text">My Finance</span>
             <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30 flex items-center justify-center bg-background">
-              <img src={logoImg} alt="My Finance" className="w-5 h-5 object-contain" />
+              <img src={appIcon} alt="My Finance" className="w-5 h-5 object-contain" />
             </div>
           </button>
         </div>
