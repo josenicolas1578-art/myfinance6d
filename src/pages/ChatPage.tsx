@@ -242,7 +242,7 @@ const ChatPage = () => {
 
   if (formCompleted === false) {
     return (
-      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center" style={{ height: "calc(100dvh - 56px - 64px)" }}>
+      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center h-[calc(100dvh-56px-64px)] lg:h-[calc(100dvh-56px)]">
         <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center neon-glow">
           <AlertTriangle className="w-8 h-8 text-primary" />
         </div>
