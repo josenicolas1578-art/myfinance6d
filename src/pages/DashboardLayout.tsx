@@ -6,7 +6,7 @@ import OnboardingTutorial from "@/components/OnboardingTutorial";
 import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import logoImg from "@/assets/logo.png";
+import appIcon from "@/assets/app-icon.png";
 import { Menu, X, Instagram, Wallet } from "lucide-react";
 
 const DashboardLayout = () => {
@@ -79,7 +79,7 @@ const DashboardLayout = () => {
           >
             <span className="text-base font-heading font-bold text-primary neon-text">My Finance</span>
             <div className="w-8 h-8 rounded-full overflow-hidden border border-primary/30 flex items-center justify-center bg-background">
-              <img src={logoImg} alt="My Finance" className="w-5 h-5 object-contain" />
+              <img src={appIcon} alt="My Finance" className="w-5 h-5 object-contain" />
             </div>
           </button>
         </div>
@@ -101,7 +101,7 @@ const DashboardLayout = () => {
             </button>
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-primary/40 neon-glow flex items-center justify-center bg-background">
-                <img src={logoImg} alt="My Finance" className="w-9 h-9 object-contain" />
+                <img src={appIcon} alt="My Finance" className="w-9 h-9 object-contain" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-lg font-heading font-bold text-primary neon-text">My Finance</h3>
