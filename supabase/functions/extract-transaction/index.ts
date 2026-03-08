@@ -28,14 +28,11 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    // For custom agents, auto-detect category; for built-in topics, use directly
-    const isCustomAgent = topic.startsWith("agent-") || topic.startsWith("custom:");
-    const categoryInstruction = isCustomAgent
-      ? `Detecte automaticamente a categoria de cada transação:
+    // Always auto-detect category from message content
+    const categoryInstruction = `Detecte automaticamente a categoria de cada transação:
 - "gastos" para despesas, compras, pagamentos
 - "investimentos" para aportes, investimentos
-- "retornos" para lucros, rendimentos, ganhos, salários recebidos`
-      : `Categoria: "${topic}" (gastos = despesas/compras, investimentos = aportes/investimentos, retornos = lucros/rendimentos)`;
+- "retornos" para lucros, rendimentos, ganhos, salários recebidos`;
 
     const extractPrompt = `Analise a mensagem do usuário abaixo e extraia TODAS as transações financeiras mencionadas.
 
