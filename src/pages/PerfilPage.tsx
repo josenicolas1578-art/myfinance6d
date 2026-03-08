@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy, Sparkles, PartyPopper } from "lucide-react";
+import { LogOut, Camera, Pencil, Check, X, Wallet, Target, PiggyBank, DollarSign, AlertTriangle, Trophy, Sparkles, PartyPopper, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import ProfileForm from "@/components/ProfileForm";
 import {
@@ -116,6 +117,8 @@ const PerfilPage = () => {
   const [editingField, setEditingField] = useState<EditableField>(null);
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
+  const [clearingData, setClearingData] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) fetchProfile();
@@ -154,6 +157,41 @@ const PerfilPage = () => {
     }
     setLoading(false);
     setEditingForm(false);
+  };
+
+  const handleClearData = async () => {
+    if (!user) return;
+    setClearingData(true);
+    try {
+      // Delete all transactions
+      await supabase.from("transactions").delete().eq("user_id", user.id);
+      // Delete all chat messages
+      await supabase.from("chat_messages").delete().eq("user_id", user.id);
+      // Delete all custom agents
+      await supabase.from("custom_agents").delete().eq("user_id", user.id);
+      // Reset profile data
+      await supabase.from("profiles").update({
+        form_completed: false,
+        current_balance: null,
+        salary_amount: null,
+        salary_type: null,
+        fixed_expenses: null,
+        financial_goal: null,
+        savings_target: null,
+        goal_amount: null,
+        daily_spending_limit: null,
+      }).eq("user_id", user.id);
+      // Clear localStorage tutorial flag
+      localStorage.removeItem(`myfinance_tutorial_done_${user.id}`);
+      toast.success("Dados limpos com sucesso!");
+      navigate("/dashboard/chat");
+      // Force reload to reset all state
+      window.location.reload();
+    } catch (e: any) {
+      toast.error("Erro ao limpar dados: " + (e.message || "Tente novamente"));
+    } finally {
+      setClearingData(false);
+    }
   };
 
   const startEdit = (field: EditableField) => {
@@ -510,6 +548,44 @@ const PerfilPage = () => {
                 onClick={signOut}
               >
                 Sim
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+
+      {/* Clear data */}
+      <div className="w-full max-w-xs">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
+              disabled={clearingData}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {clearingData ? "Limpando..." : "Limpar dados da conta"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+                Limpar todos os dados?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação é <strong>irreversível</strong>. Todos os seus dados serão apagados permanentemente:
+                transações, mensagens do chat, agentes personalizados, metas e configurações financeiras.
+                Você será redirecionado para recomeçar do zero.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleClearData}
+              >
+                Sim, limpar tudo
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
