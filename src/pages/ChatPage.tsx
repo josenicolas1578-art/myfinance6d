@@ -15,6 +15,12 @@ const TOPIC_LABELS: Record<ChatTopic, string> = {
   retornos: "Retornos",
 };
 
+const INITIAL_MESSAGES: Record<ChatTopic, Msg[]> = {
+  gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
+  investimentos: [],
+  retornos: [],
+};
+
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
 async function streamChat({
@@ -86,16 +92,42 @@ const ChatPage = () => {
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<ChatTopic, Msg[]>>({
-    gastos: [{ role: "assistant", content: "Especifique o valor que você gastou e com o que você gastou." }],
+    gastos: [...INITIAL_MESSAGES.gastos],
     investimentos: [],
     retornos: [],
   });
+  const [loadedTopics, setLoadedTopics] = useState<Set<ChatTopic>>(new Set());
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const messages = conversations[chatTopic];
+
+  // Load messages from DB for current topic
+  useEffect(() => {
+    if (!user || loadedTopics.has(chatTopic)) return;
+
+    const loadMessages = async () => {
+      const { data } = await supabase
+        .from("chat_messages")
+        .select("role, content")
+        .eq("user_id", user.id)
+        .eq("topic", chatTopic)
+        .order("created_at", { ascending: true });
+
+      if (data && data.length > 0) {
+        const msgs = data.map((m: any) => ({ role: m.role as "user" | "assistant", content: m.content }));
+        setConversations((prev) => ({ ...prev, [chatTopic]: msgs }));
+      } else {
+        // Use initial messages if no history
+        setConversations((prev) => ({ ...prev, [chatTopic]: [...INITIAL_MESSAGES[chatTopic]] }));
+      }
+      setLoadedTopics((prev) => new Set(prev).add(chatTopic));
+    };
+
+    loadMessages();
+  }, [user, chatTopic, loadedTopics]);
 
   useEffect(() => {
     if (user) {
@@ -111,6 +143,16 @@ const ChatPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  const saveMessage = async (topic: ChatTopic, role: string, content: string) => {
+    if (!user) return;
+    await supabase.from("chat_messages").insert({
+      user_id: user.id,
+      topic,
+      role,
+      content,
+    });
+  };
 
   const extractTransactions = async (userMsg: string, aiMsg: string, topic: ChatTopic) => {
     try {
@@ -140,6 +182,9 @@ const ChatPage = () => {
     }));
     setInput("");
     setIsLoading(true);
+
+    // Save user message to DB
+    saveMessage(chatTopic, "user", text);
 
     let assistantSoFar = "";
     const allMessages = [...messages, userMsg];
@@ -171,6 +216,8 @@ const ChatPage = () => {
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);
+          // Save assistant message to DB
+          saveMessage(chatTopic, "assistant", assistantSoFar);
           // Extract transactions in background
           extractTransactions(text, assistantSoFar, chatTopic);
         },

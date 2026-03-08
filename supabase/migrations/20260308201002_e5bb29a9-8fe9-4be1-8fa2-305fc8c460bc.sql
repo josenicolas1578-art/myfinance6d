@@ -1,0 +1,1 @@
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS daily_spending_limit numeric DEFAULT NULL;
