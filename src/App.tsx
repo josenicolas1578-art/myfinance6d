@@ -36,6 +36,7 @@ const App = () => (
               <Route index element={<Navigate to="chat" replace />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="graficos" element={<GraficosPage />} />
+              <Route path="resumos" element={<ResumosPage />} />
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />

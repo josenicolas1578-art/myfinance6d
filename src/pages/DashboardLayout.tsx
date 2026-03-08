@@ -1,19 +1,19 @@
 import { useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
-import SideMenu from "@/components/SideMenu";
+import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import logoImg from "@/assets/logo.png";
 import { Menu, X, Instagram } from "lucide-react";
 
 const DashboardLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [chatTopic, setChatTopic] = useState<ChatTopic>("gastos");
   const location = useLocation();
   const isChatPage = location.pathname === "/dashboard/chat";
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-background">
-      {/* Header */}
       <header className="border-b border-border bg-card px-4">
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
           {isChatPage ? (
@@ -27,7 +27,6 @@ const DashboardLayout = () => {
             <div className="w-10" />
           )}
 
-          {/* Logo + name - clickable */}
           <button
             onClick={() => setAboutOpen(true)}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
@@ -54,23 +53,17 @@ const DashboardLayout = () => {
             >
               <X className="w-4 h-4" />
             </button>
-
             <div className="flex flex-col items-center gap-4 text-center">
               <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-primary/40 neon-glow flex items-center justify-center bg-background">
                 <img src={logoImg} alt="My Finance" className="w-9 h-9 object-contain" />
               </div>
-
               <div className="space-y-1">
                 <h3 className="text-lg font-heading font-bold text-primary neon-text">My Finance</h3>
                 <p className="text-xs text-muted-foreground">Seu assistente financeiro inteligente</p>
               </div>
-
               <div className="w-full h-px bg-border" />
-
               <div className="space-y-2">
-                <p className="text-sm text-foreground">
-                  Criado e programado por
-                </p>
+                <p className="text-sm text-foreground">Criado e programado por</p>
                 <a
                   href="https://www.instagram.com/nicolas.nzk?igsh=MTJ0OWt4OWN6NGZ1Mw%3D%3D&utm_source=qr"
                   target="_blank"
@@ -86,10 +79,17 @@ const DashboardLayout = () => {
         </div>
       )}
 
-      {isChatPage && <SideMenu open={menuOpen} onClose={() => setMenuOpen(false)} />}
+      {isChatPage && (
+        <SideMenu
+          open={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          activeTopic={chatTopic}
+          onSelectTopic={setChatTopic}
+        />
+      )}
 
       <main className="flex-1 overflow-y-auto pb-16">
-        <Outlet />
+        {isChatPage ? <Outlet context={{ chatTopic }} /> : <Outlet />}
       </main>
 
       <BottomNav />
