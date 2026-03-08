@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Target, Sparkles, ArrowRight } from "lucide-react";
+import { MessageCircle, Target, Sparkles, ArrowRight, AlertTriangle } from "lucide-react";
 import logoImg from "@/assets/logo.png";
 
 interface OnboardingTutorialProps {
