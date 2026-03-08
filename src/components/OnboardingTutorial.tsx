@@ -39,10 +39,10 @@ const steps = [
       "Defina suas metas financeiras e acompanhe o progresso em tempo real. A barra de progresso te mostra o quão perto você está de alcançar seu objetivo.",
   },
   {
-    icon: AlertTriangle,
-    title: "⚠️ Último passo!",
+    icon: Sparkles,
+    title: "Tudo pronto!",
     description:
-      "Antes de usar o app, você precisa preencher um formulário rápido na aba Perfil com suas informações financeiras. É essencial pra personalizar tudo pra você!",
+      "Agora você já conhece todas as funcionalidades do My Finance. Vamos começar a organizar sua vida financeira!",
   },
 ];
 
