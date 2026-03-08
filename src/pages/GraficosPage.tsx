@@ -441,7 +441,8 @@ const GraficosPage = () => {
               )}
             </div>
           );
-        })
+        })}
+        </>
       )}
 
       {/* Daily limit exceeded alert */}
