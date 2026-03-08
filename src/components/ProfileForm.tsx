@@ -27,6 +27,7 @@ const ProfileForm = ({ userId, onComplete }: ProfileFormProps) => {
   const [fixedExpenses, setFixedExpenses] = useState("");
   const [financialGoal, setFinancialGoal] = useState<string | null>(null);
   const [savingsTarget, setSavingsTarget] = useState("");
+  const [currentBalance, setCurrentBalance] = useState("");
   const [saving, setSaving] = useState(false);
 
   const formatCurrency = (value: string) => {
