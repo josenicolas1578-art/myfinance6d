@@ -575,7 +575,8 @@ const PerfilPage = () => {
             ) : (() => {
               const step = currentBalance >= 10000 ? 5000 : 1000;
               const base = Math.ceil(currentBalance / step) * step;
-              const options = Array.from({ length: 4 }, (_, i) => base + step * (i + 1));
+              const start = base > currentBalance ? base : base + step;
+              const options = Array.from({ length: 4 }, (_, i) => start + step * i);
               return (
                 <>
                   <p className="text-xs text-muted-foreground">
