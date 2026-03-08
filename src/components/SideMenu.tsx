@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { X, DollarSign, TrendingUp, RotateCcw, Plus, Bot, Trash2 } from "lucide-react";
+import { X, Plus, Bot, Trash2, MessageCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
