@@ -432,14 +432,34 @@ const PerfilPage = () => {
 
       {/* Logout */}
       <div className="w-full max-w-xs mt-2">
-        <Button
-          variant="outline"
-          className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
-          onClick={signOut}
-        >
-          <LogOut className="w-4 h-4 mr-2" />
-          Sair da conta
-        </Button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sair da conta
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Sair da conta</AlertDialogTitle>
+              <AlertDialogDescription>
+                Você tem certeza que deseja sair da conta?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Não</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={signOut}
+              >
+                Sim
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
 
       {/* Balance confirm dialog */}
