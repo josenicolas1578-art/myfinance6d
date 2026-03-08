@@ -138,7 +138,7 @@ const Auth = () => {
                     placeholder="seu@email.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-sm"
+                    className="pl-10 h-10 bg-secondary border-border focus:border-primary focus:ring-primary text-base"
                     required
                   />
                 </div>
