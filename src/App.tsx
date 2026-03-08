@@ -6,7 +6,10 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Auth from "./pages/Auth";
-import Dashboard from "./pages/Dashboard";
+import DashboardLayout from "./pages/DashboardLayout";
+import ChatPage from "./pages/ChatPage";
+import GraficosPage from "./pages/GraficosPage";
+import PerfilPage from "./pages/PerfilPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,10 +28,15 @@ const App = () => (
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
+                  <DashboardLayout />
                 </ProtectedRoute>
               }
-            />
+            >
+              <Route index element={<Navigate to="chat" replace />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="graficos" element={<GraficosPage />} />
+              <Route path="perfil" element={<PerfilPage />} />
+            </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
