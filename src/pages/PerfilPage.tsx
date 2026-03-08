@@ -554,6 +554,44 @@ const PerfilPage = () => {
         </AlertDialog>
       </div>
 
+      {/* Clear data */}
+      <div className="w-full max-w-xs">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full border-destructive/40 text-destructive hover:bg-destructive/10"
+              disabled={clearingData}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              {clearingData ? "Limpando..." : "Limpar dados da conta"}
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-destructive" />
+                Limpar todos os dados?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Esta ação é <strong>irreversível</strong>. Todos os seus dados serão apagados permanentemente:
+                transações, mensagens do chat, agentes personalizados, metas e configurações financeiras.
+                Você será redirecionado para recomeçar do zero.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={handleClearData}
+              >
+                Sim, limpar tudo
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+
       {/* Balance confirm dialog */}
       <AlertDialog open={balanceConfirmOpen} onOpenChange={setBalanceConfirmOpen}>
         <AlertDialogContent>
