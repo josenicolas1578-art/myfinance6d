@@ -306,7 +306,76 @@ const GraficosPage = () => {
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        (["gastos", "investimentos", "retornos"] as Category[]).map((cat) => {
+        <>
+          {/* General overview chart */}
+          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" />
+                <h3 className="text-sm font-heading font-semibold text-foreground">Visão Geral</h3>
+              </div>
+              <span className={`text-sm font-bold ${
+                generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]"
+              }`}>
+                {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
+              </span>
+            </div>
+
+            {generalChartData.length === 0 || generalChartData.every((d) => d.net === 0) ? (
+              <div className="flex items-center justify-center h-32 text-xs text-muted-foreground">
+                Nenhum registro no período
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height={160}>
+                <AreaChart data={generalChartData}>
+                  <defs>
+                    <linearGradient id="gradient-positive" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(140, 70%, 50%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(140, 70%, 50%)" stopOpacity={0} />
+                    </linearGradient>
+                    <linearGradient id="gradient-negative" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="date"
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 10 }}
+                    axisLine={false}
+                    tickLine={false}
+                    width={50}
+                    tickFormatter={(v) => `R$${v}`}
+                  />
+                  <ReferenceLine y={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" strokeOpacity={0.5} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "8px",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value: number) => [formatBRL(value), value >= 0 ? "Positivo" : "Negativo"]}
+                    labelStyle={{ color: "hsl(var(--muted-foreground))" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="net"
+                    stroke={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "hsl(140, 70%, 50%)" : "hsl(0, 80%, 60%)"}
+                    fill={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "url(#gradient-positive)" : "url(#gradient-negative)"}
+                    strokeWidth={2}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {(["gastos", "investimentos", "retornos"] as Category[]).map((cat) => {
           const config = CATEGORY_CONFIG[cat];
           const data = buildChartData(cat);
           const Icon = config.icon;
