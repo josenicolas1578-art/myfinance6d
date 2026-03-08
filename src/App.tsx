@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import DashboardLayout from "./pages/DashboardLayout";
 import ChatPage from "./pages/ChatPage";
 import GraficosPage from "./pages/GraficosPage";
+import ResumosPage from "./pages/ResumosPage";
 import PerfilPage from "./pages/PerfilPage";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +36,7 @@ const App = () => (
               <Route index element={<Navigate to="chat" replace />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="graficos" element={<GraficosPage />} />
+              <Route path="resumos" element={<ResumosPage />} />
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
