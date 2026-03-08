@@ -231,7 +231,7 @@ const ChatPage = () => {
         onDone: () => {
           setIsLoading(false);
           saveMessage(chatTopic, "assistant", assistantSoFar);
-          extractTransactions(text, assistantSoFar, chatTopic);
+          extractTransactions(text, assistantSoFar);
         },
       });
     } catch (e: any) {
