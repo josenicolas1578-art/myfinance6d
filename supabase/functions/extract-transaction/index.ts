@@ -78,11 +78,19 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
 
     const aiData = await aiResp.json();
     let rawContent = aiData.choices?.[0]?.message?.content?.trim() || "[]";
+    console.log("AI raw response for:", userMessage, "=>", rawContent);
     rawContent = rawContent.replace(/```json?\s*/g, "").replace(/```/g, "").trim();
+    
+    // Try to extract JSON array from response
+    const arrayMatch = rawContent.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      rawContent = arrayMatch[0];
+    }
 
-    let transactions: { amount: number; description: string }[] = [];
+    let transactions: { amount: number; description: string; category: string }[] = [];
     try {
-      transactions = JSON.parse(rawContent);
+      const parsed = JSON.parse(rawContent);
+      transactions = Array.isArray(parsed) ? parsed : [];
     } catch {
       console.error("Failed to parse AI response:", rawContent);
       return new Response(JSON.stringify({ transactions: [] }), {
