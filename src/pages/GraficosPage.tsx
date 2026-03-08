@@ -22,6 +22,7 @@ interface Transaction {
   amount: number;
   transaction_date: string;
   category: string;
+  description: string | null;
 }
 
 const PERIOD_LABELS: Record<Period, string> = {
