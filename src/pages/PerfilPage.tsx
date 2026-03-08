@@ -93,6 +93,15 @@ const PerfilPage = () => {
 
   const startEdit = (field: EditableField) => {
     if (!field || !profileData) return;
+    if (field === "current_balance") {
+      setBalanceConfirmOpen(true);
+      return;
+    }
+    openFieldEditor(field);
+  };
+
+  const openFieldEditor = (field: EditableField) => {
+    if (!field || !profileData) return;
     if (field === "financial_goal") {
       setEditValue(profileData.financial_goal || "");
     } else if (field === "salary_type") {
