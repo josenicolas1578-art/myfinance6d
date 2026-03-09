@@ -234,7 +234,8 @@ const GraficosPage = () => {
       if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0 };
       if (t.category === "retornos") {
         dateMap[key].gains += Number(t.amount);
-      } else {
+      } else if (t.category === "gastos") {
+        // "investimentos" não conta como gasto no gráfico geral
         dateMap[key].expenses += Number(t.amount);
       }
     });
