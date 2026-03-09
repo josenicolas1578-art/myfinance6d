@@ -14,6 +14,9 @@ const DashboardLayout = () => {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(() => {
+    return localStorage.getItem("myfinance_balance_hidden") === "true";
+  });
   const [chatTopic, setChatTopic] = useState<ChatTopic>("geral");
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
