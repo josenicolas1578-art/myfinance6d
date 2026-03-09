@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { Send, AlertTriangle } from "lucide-react";
+import { Send, AlertTriangle, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/contexts/AuthContext";
@@ -81,6 +81,7 @@ async function streamChat({
 }
 
 const EXTRACT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-transaction`;
+const UNDO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/undo-last-chat`;
 
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
@@ -184,6 +185,47 @@ const ChatPage = () => {
     } catch (e) {
       console.error("extract error:", e);
     }
+  };
+
+  const clearChat = () => {
+    setConversations((prev) => ({
+      ...prev,
+      [chatTopic]: INITIAL_MESSAGES[chatTopic] ? [...INITIAL_MESSAGES[chatTopic]] : [],
+    }));
+    toast.success("Chat limpo! A memória foi mantida.");
+  };
+
+  const undoLast = async () => {
+    if (isLoading || messages.length < 2) return;
+    setIsLoading(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error("Não autenticado");
+
+      const resp = await fetch(UNDO_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ topic: chatTopic }),
+      });
+
+      const result = await resp.json();
+      if (!resp.ok) throw new Error(result.error || "Erro ao desfazer");
+
+      // Remove last 2 messages (user + assistant) from UI
+      setConversations((prev) => {
+        const topicMsgs = prev[chatTopic] || [];
+        const trimmed = topicMsgs.slice(0, -2);
+        return { ...prev, [chatTopic]: trimmed.length > 0 ? trimmed : (INITIAL_MESSAGES[chatTopic] ? [...INITIAL_MESSAGES[chatTopic]] : []) };
+      });
+
+      toast.success("Última solicitação desfeita! Gráficos atualizados.");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao desfazer");
+    }
+    setIsLoading(false);
   };
 
   const send = async () => {
@@ -324,7 +366,25 @@ const ChatPage = () => {
 
       {/* Input */}
       <div className="shrink-0 border-t border-border bg-card p-3">
-        <div className="flex gap-2 max-w-lg lg:max-w-3xl mx-auto w-full">
+        <div className="flex gap-2 max-w-lg lg:max-w-3xl mx-auto w-full items-center">
+          <div className="flex gap-1 shrink-0">
+            <button
+              onClick={clearChat}
+              disabled={isLoading || messages.length === 0}
+              title="Limpar chat (mantém memória)"
+              className="w-9 h-9 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center hover:bg-secondary/80 hover:text-foreground disabled:opacity-30 transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={undoLast}
+              disabled={isLoading || messages.length < 2}
+              title="Desfazer última solicitação"
+              className="w-9 h-9 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center hover:bg-secondary/80 hover:text-foreground disabled:opacity-30 transition-all"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+          </div>
           <input
             ref={inputRef}
             type="text"
