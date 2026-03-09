@@ -41,7 +41,17 @@ const DashboardLayout = () => {
     navigate("/dashboard/chat");
   };
 
-  const { balanceFormatted } = useRealtimeBalance();
+  const { balance, balanceFormatted } = useRealtimeBalance();
+
+  const toggleBalanceVisibility = () => {
+    const newValue = !balanceHidden;
+    setBalanceHidden(newValue);
+    localStorage.setItem("myfinance_balance_hidden", String(newValue));
+  };
+
+  const maskedBalance = balanceFormatted.replace(/[\d]/g, (_, i) => {
+    return "*";
+  }).replace(/,\*\*/g, ",**");
 
   return (
     <div className="fixed inset-0 flex bg-background overflow-hidden">
