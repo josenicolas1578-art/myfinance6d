@@ -67,8 +67,6 @@ const GraficosPage = () => {
   const [limitExceededOpen, setLimitExceededOpen] = useState(false);
   const [todaySpending, setTodaySpending] = useState(0);
 
-  const [refreshing, setRefreshing] = useState(false);
-
   useEffect(() => {
     if (user) {
       fetchTransactions();
