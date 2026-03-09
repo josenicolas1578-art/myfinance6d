@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import DashboardLayout from "./pages/DashboardLayout";
 import ChatPage from "./pages/ChatPage";
 import GraficosPage from "./pages/GraficosPage";
+import IAPage from "./pages/IAPage";
 import NotasPage from "./pages/NotasPage";
 import PerfilPage from "./pages/PerfilPage";
 import AdminPage from "./pages/AdminPage";
@@ -37,6 +38,7 @@ const App = () => (
               <Route index element={<Navigate to="chat" replace />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="graficos" element={<GraficosPage />} />
+              <Route path="ia" element={<IAPage />} />
               <Route path="notas" element={<NotasPage />} />
               
               <Route path="perfil" element={<PerfilPage />} />
