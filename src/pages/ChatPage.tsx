@@ -266,7 +266,7 @@ const ChatPage = () => {
   return (
     <div className="flex flex-col h-full pb-16 lg:pb-0">
       {/* Topic banner */}
-      <div className="px-4 py-2 bg-secondary/50 border-b border-border text-center">
+      <div className="shrink-0 px-4 py-2 bg-secondary/50 border-b border-border text-center">
         <p className="text-xs text-muted-foreground">
           Você está falando com o chat de{" "}
           <span className="text-primary font-semibold">{topicLabel}</span>
@@ -274,7 +274,7 @@ const ChatPage = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 lg:px-8 py-4 space-y-4 max-w-3xl mx-auto w-full">
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 lg:px-8 py-4 space-y-4 max-w-3xl mx-auto w-full">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full gap-2 text-center">
             <p className="text-sm text-muted-foreground">

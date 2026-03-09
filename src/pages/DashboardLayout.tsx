@@ -41,13 +41,13 @@ const DashboardLayout = () => {
   const { balanceFormatted } = useRealtimeBalance();
 
   return (
-    <div className="flex bg-background h-[100dvh] overflow-hidden">
+    <div className="fixed inset-0 flex bg-background overflow-hidden">
       {showTutorial && <OnboardingTutorial onComplete={completeTutorial} />}
 
       <BottomNav onAboutClick={() => setAboutOpen(true)} />
 
       {/* Main content area - offset on desktop for sidebar */}
-      <div className="flex flex-col flex-1 lg:ml-56 h-[100dvh] overflow-hidden">
+      <div className="flex flex-col flex-1 lg:ml-56 min-h-0 overflow-hidden">
         {/* Header */}
         <header className="shrink-0 border-b border-border bg-card px-4" style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
           <div className="flex items-center justify-between h-14 w-full">
