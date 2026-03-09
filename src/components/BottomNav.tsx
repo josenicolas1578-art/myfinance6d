@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { MessageCircle, BarChart3, StickyNote, UserCircle } from "lucide-react";
+import { MessageCircle, BarChart3, Bot, StickyNote, UserCircle } from "lucide-react";
 import appIcon from "@/assets/app-icon.png";
 
 const tabs = [
