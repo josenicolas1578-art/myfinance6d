@@ -81,6 +81,7 @@ async function streamChat({
 }
 
 const EXTRACT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/extract-transaction`;
+const UNDO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/undo-last-chat`;
 
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
