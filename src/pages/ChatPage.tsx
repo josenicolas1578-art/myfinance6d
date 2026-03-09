@@ -366,7 +366,25 @@ const ChatPage = () => {
 
       {/* Input */}
       <div className="shrink-0 border-t border-border bg-card p-3">
-        <div className="flex gap-2 max-w-lg lg:max-w-3xl mx-auto w-full">
+        <div className="flex gap-2 max-w-lg lg:max-w-3xl mx-auto w-full items-center">
+          <div className="flex gap-1 shrink-0">
+            <button
+              onClick={clearChat}
+              disabled={isLoading || messages.length === 0}
+              title="Limpar chat (mantém memória)"
+              className="w-9 h-9 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center hover:bg-secondary/80 hover:text-foreground disabled:opacity-30 transition-all"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+            <button
+              onClick={undoLast}
+              disabled={isLoading || messages.length < 2}
+              title="Desfazer última solicitação"
+              className="w-9 h-9 rounded-lg bg-secondary text-muted-foreground flex items-center justify-center hover:bg-secondary/80 hover:text-foreground disabled:opacity-30 transition-all"
+            >
+              <Undo2 className="w-4 h-4" />
+            </button>
+          </div>
           <input
             ref={inputRef}
             type="text"
