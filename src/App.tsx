@@ -11,6 +11,7 @@ import ChatPage from "./pages/ChatPage";
 import GraficosPage from "./pages/GraficosPage";
 import NotasPage from "./pages/NotasPage";
 import PerfilPage from "./pages/PerfilPage";
+import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +41,7 @@ const App = () => (
               
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
