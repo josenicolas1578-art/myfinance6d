@@ -41,6 +41,7 @@ const App = () => (
               
               <Route path="perfil" element={<PerfilPage />} />
             </Route>
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
