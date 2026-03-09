@@ -92,6 +92,7 @@ export type Database = {
       notes: {
         Row: {
           content: string | null
+          cover_image_url: string | null
           created_at: string
           id: string
           tag: string | null
@@ -101,6 +102,7 @@ export type Database = {
         }
         Insert: {
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           tag?: string | null
@@ -110,6 +112,7 @@ export type Database = {
         }
         Update: {
           content?: string | null
+          cover_image_url?: string | null
           created_at?: string
           id?: string
           tag?: string | null

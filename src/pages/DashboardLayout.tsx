@@ -8,12 +8,15 @@ import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
 
 import appIcon from "@/assets/app-icon.png";
-import { Menu, X, Instagram, Wallet } from "lucide-react";
+import { Menu, X, Instagram, Wallet, Eye, EyeOff } from "lucide-react";
 
 const DashboardLayout = () => {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(() => {
+    return localStorage.getItem("myfinance_balance_hidden") === "true";
+  });
   const [chatTopic, setChatTopic] = useState<ChatTopic>("geral");
   const [showTutorial, setShowTutorial] = useState(false);
   const location = useLocation();
@@ -38,7 +41,17 @@ const DashboardLayout = () => {
     navigate("/dashboard/chat");
   };
 
-  const { balanceFormatted } = useRealtimeBalance();
+  const { balance, balanceFormatted } = useRealtimeBalance();
+
+  const toggleBalanceVisibility = () => {
+    const newValue = !balanceHidden;
+    setBalanceHidden(newValue);
+    localStorage.setItem("myfinance_balance_hidden", String(newValue));
+  };
+
+  const maskedBalance = balanceFormatted.replace(/[\d]/g, (_, i) => {
+    return "*";
+  }).replace(/,\*\*/g, ",**");
 
   return (
     <div className="fixed inset-0 flex bg-background overflow-hidden">
@@ -62,7 +75,15 @@ const DashboardLayout = () => {
               )}
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20">
                 <Wallet className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">{balanceFormatted}</span>
+                <span className="text-xs font-semibold text-primary">
+                  {balanceHidden ? maskedBalance : balanceFormatted}
+                </span>
+                <button
+                  onClick={toggleBalanceVisibility}
+                  className="ml-1 text-primary/60 hover:text-primary transition-colors"
+                >
+                  {balanceHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
 
