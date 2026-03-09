@@ -1,10 +1,9 @@
-import { useState, useEffect } from "react";
-import { Plus, Trash2, Edit2, Save, X, FileText, Tag } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Plus, Trash2, Edit2, Save, X, FileText, Tag, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -23,6 +22,7 @@ interface Note {
   title: string;
   content: string;
   tag: string | null;
+  cover_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +40,10 @@ const NotasPage = () => {
   const [content, setContent] = useState("");
   const [tag, setTag] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (user) fetchNotes();
@@ -59,16 +63,61 @@ const NotasPage = () => {
     setLoading(false);
   };
 
+  const uploadCoverImage = async (file: File): Promise<string | null> => {
+    if (!user) return null;
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/${crypto.randomUUID()}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from("note-covers")
+      .upload(path, file, { upsert: true });
+
+    if (error) {
+      toast.error("Erro ao enviar imagem");
+      return null;
+    }
+
+    const { data } = supabase.storage.from("note-covers").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
+  const handleCoverSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Imagem deve ter no máximo 5MB");
+      return;
+    }
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  };
+
+  const removeCover = () => {
+    setCoverFile(null);
+    setCoverPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const handleSave = async () => {
     if (!title.trim()) {
       toast.error("O título é obrigatório");
       return;
     }
 
+    setUploading(true);
+    let coverUrl: string | null = editingNote?.cover_image_url ?? null;
+
+    if (coverFile) {
+      const url = await uploadCoverImage(coverFile);
+      if (url) coverUrl = url;
+    } else if (!coverPreview && editingNote?.cover_image_url) {
+      coverUrl = null;
+    }
+
     if (editingNote) {
       const { error } = await supabase
         .from("notes")
-        .update({ title, content, tag })
+        .update({ title, content, tag, cover_image_url: coverUrl })
         .eq("id", editingNote.id);
 
       if (error) {
@@ -81,7 +130,7 @@ const NotasPage = () => {
     } else {
       const { error } = await supabase
         .from("notes")
-        .insert({ user_id: user!.id, title, content, tag });
+        .insert({ user_id: user!.id, title, content, tag, cover_image_url: coverUrl });
 
       if (error) {
         toast.error("Erro ao criar nota");
@@ -91,11 +140,11 @@ const NotasPage = () => {
         resetForm();
       }
     }
+    setUploading(false);
   };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("notes").delete().eq("id", id);
-
     if (error) {
       toast.error("Erro ao deletar nota");
     } else {
@@ -109,6 +158,8 @@ const NotasPage = () => {
     setTitle(note.title);
     setContent(note.content);
     setTag(note.tag);
+    setCoverPreview(note.cover_image_url);
+    setCoverFile(null);
     setShowForm(true);
   };
 
@@ -118,6 +169,8 @@ const NotasPage = () => {
     setTitle("");
     setContent("");
     setTag(null);
+    setCoverFile(null);
+    setCoverPreview(null);
   };
 
   const filteredNotes = activeFilter
@@ -188,6 +241,40 @@ const NotasPage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            {/* Cover Image */}
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <ImagePlus className="w-3.5 h-3.5" />
+                Foto de capa
+              </div>
+              {coverPreview ? (
+                <div className="relative rounded-lg overflow-hidden border border-border">
+                  <img src={coverPreview} alt="Capa" className="w-full h-32 object-cover" />
+                  <button
+                    onClick={removeCover}
+                    className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm rounded-full p-1 hover:bg-background transition-colors"
+                  >
+                    <X className="w-4 h-4 text-foreground" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-primary/40 transition-colors flex flex-col items-center justify-center gap-1 text-muted-foreground hover:text-primary"
+                >
+                  <ImagePlus className="w-5 h-5" />
+                  <span className="text-xs">Adicionar imagem de capa</span>
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleCoverSelect}
+                className="hidden"
+              />
+            </div>
+
             <Input
               placeholder="Título da nota..."
               value={title}
@@ -221,9 +308,9 @@ const NotasPage = () => {
                 ))}
               </div>
             </div>
-            <Button onClick={handleSave} className="w-full gap-1.5">
+            <Button onClick={handleSave} disabled={uploading} className="w-full gap-1.5">
               <Save className="w-4 h-4" />
-              {editingNote ? "Salvar Alterações" : "Criar Nota"}
+              {uploading ? "Salvando..." : editingNote ? "Salvar Alterações" : "Criar Nota"}
             </Button>
           </CardContent>
         </Card>
@@ -245,7 +332,16 @@ const NotasPage = () => {
           filteredNotes.map((note) => {
             const tagInfo = getTagInfo(note.tag);
             return (
-              <Card key={note.id} className="group">
+              <Card key={note.id} className="group overflow-hidden">
+                {note.cover_image_url && (
+                  <div className="h-28 overflow-hidden">
+                    <img
+                      src={note.cover_image_url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">

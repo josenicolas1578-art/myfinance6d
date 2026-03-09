@@ -75,7 +75,15 @@ const DashboardLayout = () => {
               )}
               <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20">
                 <Wallet className="w-3.5 h-3.5 text-primary" />
-                <span className="text-xs font-semibold text-primary">{balanceFormatted}</span>
+                <span className="text-xs font-semibold text-primary">
+                  {balanceHidden ? maskedBalance : balanceFormatted}
+                </span>
+                <button
+                  onClick={toggleBalanceVisibility}
+                  className="ml-1 text-primary/60 hover:text-primary transition-colors"
+                >
+                  {balanceHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
               </div>
             </div>
 
