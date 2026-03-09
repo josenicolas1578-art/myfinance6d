@@ -242,7 +242,7 @@ const ChatPage = () => {
 
   if (formCompleted === false) {
     return (
-      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center h-full pb-16 lg:pb-0">
+      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center h-full pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center neon-glow">
           <AlertTriangle className="w-8 h-8 text-primary" />
         </div>
