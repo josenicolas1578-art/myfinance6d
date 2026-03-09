@@ -8,7 +8,7 @@ import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
 
 import appIcon from "@/assets/app-icon.png";
-import { Menu, X, Instagram, Wallet } from "lucide-react";
+import { Menu, X, Instagram, Wallet, Eye, EyeOff } from "lucide-react";
 
 const DashboardLayout = () => {
   const { user } = useAuth();
