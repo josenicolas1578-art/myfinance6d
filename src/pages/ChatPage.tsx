@@ -323,7 +323,7 @@ const ChatPage = () => {
       </div>
 
       {/* Input */}
-      <div className="border-t border-border bg-card p-3">
+      <div className="shrink-0 border-t border-border bg-card p-3">
         <div className="flex gap-2 max-w-lg lg:max-w-3xl mx-auto w-full">
           <input
             ref={inputRef}
