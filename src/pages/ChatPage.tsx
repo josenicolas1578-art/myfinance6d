@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useOutletContext, useNavigate } from "react-router-dom";
-import { Send, AlertTriangle } from "lucide-react";
+import { Send, AlertTriangle, Trash2, Undo2 } from "lucide-react";
 import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/contexts/AuthContext";
