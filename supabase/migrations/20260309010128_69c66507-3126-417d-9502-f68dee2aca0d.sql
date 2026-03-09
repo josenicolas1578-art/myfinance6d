@@ -1,0 +1,1 @@
+ALTER TABLE public.notes ADD COLUMN tag text DEFAULT null;
