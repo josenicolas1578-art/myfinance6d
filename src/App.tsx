@@ -38,6 +38,7 @@ const App = () => (
               <Route index element={<Navigate to="chat" replace />} />
               <Route path="chat" element={<ChatPage />} />
               <Route path="graficos" element={<GraficosPage />} />
+              <Route path="ia" element={<IAPage />} />
               <Route path="notas" element={<NotasPage />} />
               
               <Route path="perfil" element={<PerfilPage />} />
