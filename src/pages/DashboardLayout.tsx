@@ -128,7 +128,7 @@ const DashboardLayout = () => {
           />
         )}
 
-        <main className={`flex-1 min-h-0 ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto pb-16 lg:pb-0'}`}>
+        <main className={`flex-1 min-h-0 ${isChatPage ? 'overflow-hidden' : 'overflow-y-auto pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0'}`}>
           {isChatPage ? <Outlet context={{ chatTopic }} /> : <Outlet />}
         </main>
       </div>
