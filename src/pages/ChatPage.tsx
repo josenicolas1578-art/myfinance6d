@@ -187,6 +187,47 @@ const ChatPage = () => {
     }
   };
 
+  const clearChat = () => {
+    setConversations((prev) => ({
+      ...prev,
+      [chatTopic]: INITIAL_MESSAGES[chatTopic] ? [...INITIAL_MESSAGES[chatTopic]] : [],
+    }));
+    toast.success("Chat limpo! A memória foi mantida.");
+  };
+
+  const undoLast = async () => {
+    if (isLoading || messages.length < 2) return;
+    setIsLoading(true);
+    try {
+      const session = (await supabase.auth.getSession()).data.session;
+      if (!session) throw new Error("Não autenticado");
+
+      const resp = await fetch(UNDO_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ topic: chatTopic }),
+      });
+
+      const result = await resp.json();
+      if (!resp.ok) throw new Error(result.error || "Erro ao desfazer");
+
+      // Remove last 2 messages (user + assistant) from UI
+      setConversations((prev) => {
+        const topicMsgs = prev[chatTopic] || [];
+        const trimmed = topicMsgs.slice(0, -2);
+        return { ...prev, [chatTopic]: trimmed.length > 0 ? trimmed : (INITIAL_MESSAGES[chatTopic] ? [...INITIAL_MESSAGES[chatTopic]] : []) };
+      });
+
+      toast.success("Última solicitação desfeita! Gráficos atualizados.");
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao desfazer");
+    }
+    setIsLoading(false);
+  };
+
   const send = async () => {
     const text = input.trim();
     if (!text || isLoading) return;
