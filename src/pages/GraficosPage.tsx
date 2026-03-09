@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts";
-import { TrendingDown, TrendingUp, BarChart3, ShieldAlert, Activity, MoreVertical, X, RefreshCw } from "lucide-react";
+import { TrendingDown, TrendingUp, BarChart3, ShieldAlert, Activity, MoreVertical, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import {
@@ -66,8 +66,6 @@ const GraficosPage = () => {
   const [savingLimit, setSavingLimit] = useState(false);
   const [limitExceededOpen, setLimitExceededOpen] = useState(false);
   const [todaySpending, setTodaySpending] = useState(0);
-
-  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -559,19 +557,6 @@ const GraficosPage = () => {
           </div>
         </div>
       )}
-      {/* Refresh button - bottom right above footer */}
-      <button
-        onClick={async () => {
-          setRefreshing(true);
-          await fetchTransactions();
-          await fetchDailyLimit();
-          setRefreshing(false);
-          toast.success("Dados atualizados!");
-        }}
-        className="fixed bottom-20 right-4 z-40 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg shadow-primary/30 neon-glow hover:bg-primary/90 transition-all"
-      >
-        <RefreshCw className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`} />
-      </button>
     </div>
   );
 };

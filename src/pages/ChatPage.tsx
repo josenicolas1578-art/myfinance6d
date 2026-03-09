@@ -242,7 +242,7 @@ const ChatPage = () => {
 
   if (formCompleted === false) {
     return (
-      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center h-full pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <div className="flex flex-col items-center justify-center gap-6 px-6 text-center h-full">
         <div className="w-16 h-16 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center neon-glow">
           <AlertTriangle className="w-8 h-8 text-primary" />
         </div>
@@ -264,7 +264,7 @@ const ChatPage = () => {
   }
 
   return (
-    <div className="flex flex-col h-full pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+    <div className="flex flex-col h-full">
       {/* Topic banner */}
       <div className="shrink-0 px-4 py-2 bg-secondary/50 border-b border-border text-center">
         <p className="text-xs text-muted-foreground">
