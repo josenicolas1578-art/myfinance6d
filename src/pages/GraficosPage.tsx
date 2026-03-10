@@ -215,37 +215,47 @@ const GraficosPage = () => {
 
   const generalChartData = useMemo(() => {
     const now = new Date();
-    const dateMap: Record<string, { gains: number; expenses: number }> = {};
+    const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
     if (period === "hoje") {
       const key = now.toISOString().split("T")[0];
-      dateMap[key] = { gains: 0, expenses: 0 };
+      dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
     } else {
       const start = period === "7dias"
         ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
         : new Date(now.getFullYear(), now.getMonth(), 1);
       for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toISOString().split("T")[0]] = { gains: 0, expenses: 0 };
+        dateMap[d.toISOString().split("T")[0]] = { gains: 0, expenses: 0, investments: 0 };
       }
     }
 
     transactions.forEach((t) => {
       const key = t.transaction_date;
-      if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0 };
+      if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
       if (t.category === "retornos") {
         dateMap[key].gains += Number(t.amount);
       } else if (t.category === "gastos") {
-        // "investimentos" não conta como gasto no gráfico geral
         dateMap[key].expenses += Number(t.amount);
+      } else if (t.category === "investimentos") {
+        dateMap[key].investments += Number(t.amount);
       }
     });
 
+    // Build cumulative net line that shows investment dips in blue context
+    let cumulative = 0;
     return Object.entries(dateMap)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([date, { gains, expenses }]) => ({
-        date: date.slice(5).replace("-", "/"),
-        net: gains - expenses,
-      }));
+      .map(([date, { gains, expenses, investments }]) => {
+        const dayNet = gains - expenses - investments;
+        cumulative += dayNet;
+        return {
+          date: date.slice(5).replace("-", "/"),
+          net: cumulative,
+          // Track dominant movement type for this day
+          investmentDay: investments > 0 && investments >= expenses && investments >= gains,
+          returnDay: gains > 0 && gains >= expenses && gains >= investments,
+        };
+      });
   }, [transactions, period]);
 
   return (
@@ -345,11 +355,21 @@ const GraficosPage = () => {
                 <h3 className="text-sm font-heading font-semibold text-foreground">Visão Geral</h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${
-                  generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]"
-                }`}>
-                  {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
-                </span>
+                {(() => {
+                  const totalNet = generalChartData.reduce((s, d) => s + d.net, 0);
+                  const lastPoint = generalChartData[generalChartData.length - 1];
+                  const hasInvestmentDominance = generalChartData.some(d => d.investmentDay);
+                  const hasReturnDominance = generalChartData.some(d => d.returnDay);
+                  // Determine color: blue if last movement was investment, green if positive/return, red if negative
+                  let color = totalNet >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]";
+                  if (lastPoint?.investmentDay) color = "text-[hsl(210,80%,60%)]";
+                  if (lastPoint?.returnDay && totalNet >= 0) color = "text-[hsl(140,70%,50%)]";
+                  return (
+                    <span className={`text-sm font-bold ${color}`}>
+                      {formatBRL(lastPoint?.net ?? 0)}
+                    </span>
+                  );
+                })()}
                 <button
                   onClick={() => setDetailCategory("geral")}
                   className="p-1 rounded-md hover:bg-secondary transition-colors"
@@ -375,6 +395,10 @@ const GraficosPage = () => {
                       <stop offset="5%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0} />
                     </linearGradient>
+                    <linearGradient id="gradient-investment" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(210, 80%, 60%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(210, 80%, 60%)" stopOpacity={0} />
+                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
@@ -398,14 +422,27 @@ const GraficosPage = () => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [formatBRL(value), value >= 0 ? "Positivo" : "Negativo"]}
+                    formatter={(value: number, name: string) => {
+                      const label = value >= 0 ? "Positivo" : "Negativo";
+                      return [formatBRL(value), label];
+                    }}
                     labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="net"
-                    stroke={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "hsl(140, 70%, 50%)" : "hsl(0, 80%, 60%)"}
-                    fill={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "url(#gradient-positive)" : "url(#gradient-negative)"}
+                    stroke={(() => {
+                      const lastPoint = generalChartData[generalChartData.length - 1];
+                      if (lastPoint?.investmentDay) return "hsl(210, 80%, 60%)";
+                      const total = generalChartData.reduce((s, d) => s + d.net, 0);
+                      return total >= 0 ? "hsl(140, 70%, 50%)" : "hsl(0, 80%, 60%)";
+                    })()}
+                    fill={(() => {
+                      const lastPoint = generalChartData[generalChartData.length - 1];
+                      if (lastPoint?.investmentDay) return "url(#gradient-investment)";
+                      const total = generalChartData.reduce((s, d) => s + d.net, 0);
+                      return total >= 0 ? "url(#gradient-positive)" : "url(#gradient-negative)";
+                    })()}
                     strokeWidth={2}
                   />
                 </AreaChart>

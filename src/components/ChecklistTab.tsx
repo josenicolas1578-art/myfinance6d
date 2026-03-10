@@ -93,80 +93,85 @@ const ChecklistTab = () => {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Add item */}
-      <div className="flex gap-2">
-        <Input
-          placeholder="Nova tarefa..."
-          value={newItem}
-          onChange={(e) => setNewItem(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1"
-        />
-        <Button onClick={handleAdd} size="icon" disabled={!newItem.trim()}>
-          <Plus className="w-4 h-4" />
-        </Button>
+    <div className="flex flex-col h-full relative">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto pb-20 space-y-4">
+        {/* Pending items */}
+        {pending.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Pendentes ({pending.length})
+            </p>
+            {pending.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card group"
+              >
+                <button onClick={() => handleToggle(item)} className="text-muted-foreground hover:text-primary transition-colors">
+                  <Circle className="w-5 h-5" />
+                </button>
+                <span className="flex-1 text-sm text-foreground">{item.title}</span>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Completed items */}
+        {completed.length > 0 && (
+          <div className="space-y-1.5">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Concluídas ({completed.length})
+            </p>
+            {completed.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/50 group"
+              >
+                <button onClick={() => handleToggle(item)} className="text-emerald-500 hover:text-emerald-400 transition-colors">
+                  <CheckCircle2 className="w-5 h-5" />
+                </button>
+                <span className="flex-1 text-sm text-muted-foreground line-through">{item.title}</span>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {items.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
+            <CheckCircle2 className="w-12 h-12 text-muted-foreground/50" />
+            <p className="text-muted-foreground">Nenhuma tarefa ainda</p>
+            <p className="text-sm text-muted-foreground/70">Adicione suas tarefas e metas diárias!</p>
+          </div>
+        )}
       </div>
 
-      {/* Pending items */}
-      {pending.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Pendentes ({pending.length})
-          </p>
-          {pending.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card group"
-            >
-              <button onClick={() => handleToggle(item)} className="text-muted-foreground hover:text-primary transition-colors">
-                <Circle className="w-5 h-5" />
-              </button>
-              <span className="flex-1 text-sm text-foreground">{item.title}</span>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
+      {/* Fixed input at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 bg-card border-t border-border p-3">
+        <div className="flex gap-2">
+          <Input
+            placeholder="Nova tarefa..."
+            value={newItem}
+            onChange={(e) => setNewItem(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1"
+          />
+          <Button onClick={handleAdd} size="icon" disabled={!newItem.trim()}>
+            <Plus className="w-4 h-4" />
+          </Button>
         </div>
-      )}
-
-      {/* Completed items */}
-      {completed.length > 0 && (
-        <div className="space-y-1.5">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-            Concluídas ({completed.length})
-          </p>
-          {completed.map((item) => (
-            <div
-              key={item.id}
-              className="flex items-center gap-3 p-3 rounded-lg border border-border bg-card/50 group"
-            >
-              <button onClick={() => handleToggle(item)} className="text-emerald-500 hover:text-emerald-400 transition-colors">
-                <CheckCircle2 className="w-5 h-5" />
-              </button>
-              <span className="flex-1 text-sm text-muted-foreground line-through">{item.title}</span>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {items.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
-          <CheckCircle2 className="w-12 h-12 text-muted-foreground/50" />
-          <p className="text-muted-foreground">Nenhuma tarefa ainda</p>
-          <p className="text-sm text-muted-foreground/70">Adicione suas tarefas e metas diárias!</p>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

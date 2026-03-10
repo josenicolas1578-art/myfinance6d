@@ -73,6 +73,8 @@ const formatBRL = (value: number | null | undefined) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
 
+const maskBRL = (formatted: string) => formatted.replace(/[\d]/g, "*");
+
 const formatCurrencyInput = (value: string) => {
   const nums = value.replace(/\D/g, "");
   const amount = parseInt(nums || "0", 10) / 100;
@@ -118,7 +120,20 @@ const PerfilPage = () => {
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [clearingData, setClearingData] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(() => localStorage.getItem("myfinance_balance_hidden") === "true");
   const navigate = useNavigate();
+
+  // Listen for balance visibility changes from header
+  useEffect(() => {
+    const handler = () => setBalanceHidden(localStorage.getItem("myfinance_balance_hidden") === "true");
+    window.addEventListener("storage", handler);
+    // Also listen for same-tab changes via custom event
+    window.addEventListener("balanceVisibilityChanged", handler);
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("balanceVisibilityChanged", handler);
+    };
+  }, []);
 
   useEffect(() => {
     if (user) fetchProfile();
@@ -453,7 +468,7 @@ const PerfilPage = () => {
               <span className="text-sm font-heading font-bold text-foreground">Minha Meta</span>
             </div>
             {goalAmount > 0 && (
-              <span className="text-xs font-semibold text-primary">{formatBRL(goalAmount)}</span>
+              <span className="text-xs font-semibold text-primary">{balanceHidden ? formatBRL(goalAmount).replace(/[\d]/g, '*') : formatBRL(goalAmount)}</span>
             )}
           </div>
 
@@ -461,7 +476,7 @@ const PerfilPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-end">
                 <span className="text-xs text-muted-foreground">Saldo atual</span>
-                <span className="text-sm font-bold text-foreground">{formatBRL(currentBalance)}</span>
+                <span className="text-sm font-bold text-foreground">{balanceHidden ? formatBRL(currentBalance).replace(/[\d]/g, '*') : formatBRL(currentBalance)}</span>
               </div>
               {/* Progress bar */}
               <div className="relative h-4 rounded-full bg-secondary/80 border border-border overflow-hidden">
@@ -513,11 +528,11 @@ const PerfilPage = () => {
         <div className="w-full max-w-xs space-y-3">
           <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
           <div className="space-y-2">
-            {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", formatBRL(profileData.current_balance), true)}
-            {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", formatBRL(profileData.salary_amount))}
-            {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", formatBRL(profileData.fixed_expenses))}
+            {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", balanceHidden ? maskBRL(formatBRL(profileData.current_balance)) : formatBRL(profileData.current_balance), true)}
+            {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", balanceHidden ? maskBRL(formatBRL(profileData.salary_amount)) : formatBRL(profileData.salary_amount))}
+            {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", balanceHidden ? maskBRL(formatBRL(profileData.fixed_expenses)) : formatBRL(profileData.fixed_expenses))}
             {renderFieldCard("financial_goal", <Target className="w-4 h-4 text-primary" />, "Objetivo financeiro", GOAL_LABELS[profileData.financial_goal] || profileData.financial_goal || "—")}
-            {renderFieldCard("savings_target", <PiggyBank className="w-4 h-4 text-primary" />, "Meta de economia mensal", formatBRL(profileData.savings_target))}
+            {renderFieldCard("savings_target", <PiggyBank className="w-4 h-4 text-primary" />, "Meta de economia mensal", balanceHidden ? maskBRL(formatBRL(profileData.savings_target)) : formatBRL(profileData.savings_target))}
           </div>
         </div>
       )}

@@ -47,6 +47,7 @@ const DashboardLayout = () => {
     const newValue = !balanceHidden;
     setBalanceHidden(newValue);
     localStorage.setItem("myfinance_balance_hidden", String(newValue));
+    window.dispatchEvent(new Event("balanceVisibilityChanged"));
   };
 
   const maskedBalance = balanceFormatted.replace(/[\d]/g, (_, i) => {
