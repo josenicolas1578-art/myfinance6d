@@ -461,7 +461,7 @@ const PerfilPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between items-end">
                 <span className="text-xs text-muted-foreground">Saldo atual</span>
-                <span className="text-sm font-bold text-foreground">{formatBRL(currentBalance)}</span>
+                <span className="text-sm font-bold text-foreground">{balanceHidden ? formatBRL(currentBalance).replace(/[\d]/g, '*') : formatBRL(currentBalance)}</span>
               </div>
               {/* Progress bar */}
               <div className="relative h-4 rounded-full bg-secondary/80 border border-border overflow-hidden">
