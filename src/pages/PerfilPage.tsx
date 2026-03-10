@@ -73,6 +73,8 @@ const formatBRL = (value: number | null | undefined) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
 
+const maskBRL = (formatted: string) => formatted.replace(/[\d]/g, "*");
+
 const formatCurrencyInput = (value: string) => {
   const nums = value.replace(/\D/g, "");
   const amount = parseInt(nums || "0", 10) / 100;
