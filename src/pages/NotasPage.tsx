@@ -408,7 +408,7 @@ const NotasPage = () => {
       </div>
         </TabsContent>
 
-        <TabsContent value="checklist" className="flex-1 min-h-0 relative data-[state=active]:flex data-[state=active]:flex-col">
+        <TabsContent value="checklist" className="flex-1 min-h-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col h-[calc(100%-3rem)]">
           <ChecklistTab />
         </TabsContent>
       </Tabs>
