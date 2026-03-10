@@ -453,7 +453,7 @@ const PerfilPage = () => {
               <span className="text-sm font-heading font-bold text-foreground">Minha Meta</span>
             </div>
             {goalAmount > 0 && (
-              <span className="text-xs font-semibold text-primary">{formatBRL(goalAmount)}</span>
+              <span className="text-xs font-semibold text-primary">{balanceHidden ? formatBRL(goalAmount).replace(/[\d]/g, '*') : formatBRL(goalAmount)}</span>
             )}
           </div>
 
