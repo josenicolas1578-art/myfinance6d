@@ -395,6 +395,10 @@ const GraficosPage = () => {
                       <stop offset="5%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0.3} />
                       <stop offset="95%" stopColor="hsl(0, 80%, 60%)" stopOpacity={0} />
                     </linearGradient>
+                    <linearGradient id="gradient-investment" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(210, 80%, 60%)" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(210, 80%, 60%)" stopOpacity={0} />
+                    </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                   <XAxis
@@ -418,14 +422,27 @@ const GraficosPage = () => {
                       borderRadius: "8px",
                       fontSize: "12px",
                     }}
-                    formatter={(value: number) => [formatBRL(value), value >= 0 ? "Positivo" : "Negativo"]}
+                    formatter={(value: number, name: string) => {
+                      const label = value >= 0 ? "Positivo" : "Negativo";
+                      return [formatBRL(value), label];
+                    }}
                     labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                   />
                   <Area
                     type="monotone"
                     dataKey="net"
-                    stroke={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "hsl(140, 70%, 50%)" : "hsl(0, 80%, 60%)"}
-                    fill={generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "url(#gradient-positive)" : "url(#gradient-negative)"}
+                    stroke={(() => {
+                      const lastPoint = generalChartData[generalChartData.length - 1];
+                      if (lastPoint?.investmentDay) return "hsl(210, 80%, 60%)";
+                      const total = generalChartData.reduce((s, d) => s + d.net, 0);
+                      return total >= 0 ? "hsl(140, 70%, 50%)" : "hsl(0, 80%, 60%)";
+                    })()}
+                    fill={(() => {
+                      const lastPoint = generalChartData[generalChartData.length - 1];
+                      if (lastPoint?.investmentDay) return "url(#gradient-investment)";
+                      const total = generalChartData.reduce((s, d) => s + d.net, 0);
+                      return total >= 0 ? "url(#gradient-positive)" : "url(#gradient-negative)";
+                    })()}
                     strokeWidth={2}
                   />
                 </AreaChart>
