@@ -121,6 +121,18 @@ const PerfilPage = () => {
   const [balanceHidden, setBalanceHidden] = useState(() => localStorage.getItem("myfinance_balance_hidden") === "true");
   const navigate = useNavigate();
 
+  // Listen for balance visibility changes from header
+  useEffect(() => {
+    const handler = () => setBalanceHidden(localStorage.getItem("myfinance_balance_hidden") === "true");
+    window.addEventListener("storage", handler);
+    // Also listen for same-tab changes via custom event
+    window.addEventListener("balanceVisibilityChanged", handler);
+    return () => {
+      window.removeEventListener("storage", handler);
+      window.removeEventListener("balanceVisibilityChanged", handler);
+    };
+  }, []);
+
   useEffect(() => {
     if (user) fetchProfile();
   }, [user]);
