@@ -355,11 +355,21 @@ const GraficosPage = () => {
                 <h3 className="text-sm font-heading font-semibold text-foreground">Visão Geral</h3>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`text-sm font-bold ${
-                  generalChartData.reduce((s, d) => s + d.net, 0) >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]"
-                }`}>
-                  {formatBRL(generalChartData.reduce((s, d) => s + d.net, 0))}
-                </span>
+                {(() => {
+                  const totalNet = generalChartData.reduce((s, d) => s + d.net, 0);
+                  const lastPoint = generalChartData[generalChartData.length - 1];
+                  const hasInvestmentDominance = generalChartData.some(d => d.investmentDay);
+                  const hasReturnDominance = generalChartData.some(d => d.returnDay);
+                  // Determine color: blue if last movement was investment, green if positive/return, red if negative
+                  let color = totalNet >= 0 ? "text-[hsl(140,70%,50%)]" : "text-[hsl(0,80%,60%)]";
+                  if (lastPoint?.investmentDay) color = "text-[hsl(210,80%,60%)]";
+                  if (lastPoint?.returnDay && totalNet >= 0) color = "text-[hsl(140,70%,50%)]";
+                  return (
+                    <span className={`text-sm font-bold ${color}`}>
+                      {formatBRL(lastPoint?.net ?? 0)}
+                    </span>
+                  );
+                })()}
                 <button
                   onClick={() => setDetailCategory("geral")}
                   className="p-1 rounded-md hover:bg-secondary transition-colors"
