@@ -528,11 +528,11 @@ const PerfilPage = () => {
         <div className="w-full max-w-xs space-y-3">
           <h3 className="text-sm font-heading font-semibold text-foreground">Perfil Financeiro</h3>
           <div className="space-y-2">
-            {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", formatBRL(profileData.current_balance), true)}
-            {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", formatBRL(profileData.salary_amount))}
-            {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", formatBRL(profileData.fixed_expenses))}
+            {renderFieldCard("current_balance", <DollarSign className="w-4 h-4 text-primary" />, "Saldo atual na conta", balanceHidden ? maskBRL(formatBRL(profileData.current_balance)) : formatBRL(profileData.current_balance), true)}
+            {profileData.salary_type === "fixo" && renderFieldCard("salary_amount", <DollarSign className="w-4 h-4 text-primary" />, "Salário mensal", balanceHidden ? maskBRL(formatBRL(profileData.salary_amount)) : formatBRL(profileData.salary_amount))}
+            {renderFieldCard("fixed_expenses", <Wallet className="w-4 h-4 text-primary" />, "Despesas fixas mensais", balanceHidden ? maskBRL(formatBRL(profileData.fixed_expenses)) : formatBRL(profileData.fixed_expenses))}
             {renderFieldCard("financial_goal", <Target className="w-4 h-4 text-primary" />, "Objetivo financeiro", GOAL_LABELS[profileData.financial_goal] || profileData.financial_goal || "—")}
-            {renderFieldCard("savings_target", <PiggyBank className="w-4 h-4 text-primary" />, "Meta de economia mensal", formatBRL(profileData.savings_target))}
+            {renderFieldCard("savings_target", <PiggyBank className="w-4 h-4 text-primary" />, "Meta de economia mensal", balanceHidden ? maskBRL(formatBRL(profileData.savings_target)) : formatBRL(profileData.savings_target))}
           </div>
         </div>
       )}
