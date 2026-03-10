@@ -191,14 +191,25 @@ const NotasPage = () => {
     <div className="flex flex-col h-full p-4 gap-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-heading font-bold text-foreground">Minhas Notas</h1>
-        {!showForm && (
-          <Button onClick={() => setShowForm(true)} size="sm" className="gap-1.5">
-            <Plus className="w-4 h-4" />
-            Nova Nota
-          </Button>
-        )}
+        <h1 className="text-xl font-heading font-bold text-foreground">Demandas</h1>
       </div>
+
+      <Tabs defaultValue="notas" className="flex flex-col flex-1 min-h-0">
+        <TabsList className="w-full">
+          <TabsTrigger value="notas" className="flex-1">Notas</TabsTrigger>
+          <TabsTrigger value="checklist" className="flex-1">Checklist</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="notas" className="flex-1 flex flex-col gap-4 min-h-0 overflow-hidden">
+          {/* New Note button */}
+          {!showForm && (
+            <div className="flex justify-end">
+              <Button onClick={() => setShowForm(true)} size="sm" className="gap-1.5">
+                <Plus className="w-4 h-4" />
+                Nova Nota
+              </Button>
+            </div>
+          )}
 
       {/* Tag Filter */}
       {!showForm && notes.length > 0 && (
