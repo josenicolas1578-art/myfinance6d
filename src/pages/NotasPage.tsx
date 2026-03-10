@@ -194,7 +194,7 @@ const NotasPage = () => {
         <h1 className="text-xl font-heading font-bold text-foreground">Demandas</h1>
       </div>
 
-      <Tabs defaultValue="notas" className="flex flex-col flex-1 min-h-0">
+      <Tabs defaultValue="notas" className="flex flex-col flex-1 min-h-0 overflow-hidden">
         <TabsList className="w-full">
           <TabsTrigger value="notas" className="flex-1">Notas</TabsTrigger>
           <TabsTrigger value="checklist" className="flex-1">Checklist</TabsTrigger>
@@ -408,7 +408,7 @@ const NotasPage = () => {
       </div>
         </TabsContent>
 
-        <TabsContent value="checklist" className="flex-1 min-h-0 relative data-[state=active]:flex data-[state=active]:flex-col">
+        <TabsContent value="checklist" className="flex-1 min-h-0 overflow-hidden data-[state=active]:flex data-[state=active]:flex-col h-[calc(100%-3rem)]">
           <ChecklistTab />
         </TabsContent>
       </Tabs>
