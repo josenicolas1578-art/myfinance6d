@@ -95,7 +95,7 @@ const ChecklistTab = () => {
   return (
     <div className="flex flex-col h-full relative">
       {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto pb-20 space-y-4">
+      <div className="overflow-y-auto pb-20 space-y-4">
         {/* Pending items */}
         {pending.length > 0 && (
           <div className="space-y-1.5">
