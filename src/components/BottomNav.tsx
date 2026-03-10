@@ -6,7 +6,7 @@ const tabs = [
   { id: "chat", label: "Chat", icon: MessageCircle, path: "/dashboard/chat" },
   { id: "graficos", label: "Gráficos", icon: BarChart3, path: "/dashboard/graficos" },
   { id: "ia", label: "IA", icon: Bot, path: "/dashboard/ia" },
-  { id: "notas", label: "Notas", icon: StickyNote, path: "/dashboard/notas" },
+  { id: "notas", label: "Demandas", icon: StickyNote, path: "/dashboard/notas" },
   { id: "perfil", label: "Perfil", icon: UserCircle, path: "/dashboard/perfil" },
 ];
 

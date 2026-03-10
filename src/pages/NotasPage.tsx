@@ -406,6 +406,12 @@ const NotasPage = () => {
           })
         )}
       </div>
+        </TabsContent>
+
+        <TabsContent value="checklist" className="flex-1 min-h-0 overflow-y-auto">
+          <ChecklistTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
