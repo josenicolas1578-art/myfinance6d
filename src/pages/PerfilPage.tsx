@@ -118,6 +118,7 @@ const PerfilPage = () => {
   const [editValue, setEditValue] = useState("");
   const [saving, setSaving] = useState(false);
   const [clearingData, setClearingData] = useState(false);
+  const [balanceHidden, setBalanceHidden] = useState(() => localStorage.getItem("myfinance_balance_hidden") === "true");
   const navigate = useNavigate();
 
   useEffect(() => {
