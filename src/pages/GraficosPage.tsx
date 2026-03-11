@@ -102,17 +102,20 @@ const GraficosPage = () => {
 
   const fetchTransactions = async () => {
     setLoading(true);
+    // Use local date (Brazil timezone) to match transaction_date stored in BRT
     const now = new Date();
+    const localDate = now.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+    const localYear = now.getFullYear();
+    const localMonth = now.getMonth();
     let startDate: string;
 
     if (period === "hoje") {
-      startDate = now.toISOString().split("T")[0];
+      startDate = localDate;
     } else if (period === "7dias") {
-      const d = new Date(now);
-      d.setDate(d.getDate() - 6);
-      startDate = d.toISOString().split("T")[0];
+      const d = new Date(localYear, localMonth, now.getDate() - 6);
+      startDate = d.toLocaleDateString("en-CA");
     } else {
-      startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+      startDate = `${localYear}-${String(localMonth + 1).padStart(2, "0")}-01`;
     }
 
     const { data } = await supabase

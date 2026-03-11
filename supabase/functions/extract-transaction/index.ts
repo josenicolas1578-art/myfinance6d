@@ -113,31 +113,14 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
       const { error: insertError } = await supabase.from("transactions").insert(rows);
       if (insertError) console.error("Insert error:", insertError);
 
-      // Update current_balance on profile
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("current_balance")
-        .eq("user_id", user.id)
-        .single();
-
-      if (profile) {
-        const currentBalance = profile.current_balance ?? 0;
-        let balanceChange = 0;
-
-        for (const r of rows) {
-          if (r.category === "retornos") {
-            balanceChange += r.amount;
-          } else if (r.category === "gastos" || r.category === "investimentos") {
-            balanceChange -= r.amount;
-          }
-        }
-
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({ current_balance: currentBalance + balanceChange })
-          .eq("user_id", user.id);
-
-        if (updateError) console.error("Balance update error:", updateError);
+      // Update current_balance atomically
+      for (const r of rows) {
+        const { error: balanceError } = await supabase.rpc("adjust_balance", {
+          _user_id: user.id,
+          _amount: r.amount,
+          _category: r.category,
+        });
+        if (balanceError) console.error("Balance update error:", balanceError);
       }
     }
 
