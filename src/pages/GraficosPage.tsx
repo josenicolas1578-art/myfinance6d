@@ -139,20 +139,17 @@ const GraficosPage = () => {
 
   const fetchTransactions = async () => {
     setLoading(true);
-    // Use local date (Brazil timezone) to match transaction_date stored in BRT
-    const now = new Date();
-    const localDate = now.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
-    const localYear = now.getFullYear();
-    const localMonth = now.getMonth();
-    let startDate: string;
 
-    if (period === "hoje") {
-      startDate = localDate;
-    } else if (period === "7dias") {
-      const d = new Date(localYear, localMonth, now.getDate() - 6);
-      startDate = d.toLocaleDateString("en-CA");
-    } else {
-      startDate = `${localYear}-${String(localMonth + 1).padStart(2, "0")}-01`;
+    const todayBrt = getBrtDateString();
+    const todayDate = parseIsoDate(todayBrt);
+
+    let startDate = todayBrt;
+    if (period === "7dias") {
+      const start = new Date(todayDate);
+      start.setUTCDate(start.getUTCDate() - 6);
+      startDate = formatIsoDate(start);
+    } else if (period === "mes") {
+      startDate = `${todayBrt.slice(0, 7)}-01`;
     }
 
     const { data } = await supabase
@@ -166,10 +163,9 @@ const GraficosPage = () => {
     setTransactions(txns);
     setLoading(false);
 
-    // Check daily limit
-    const today = new Date().toLocaleDateString("en-CA");
+    // Check daily limit using BRT date (same timezone as transaction_date)
     const todayGastos = txns
-      .filter((t) => t.category === "gastos" && t.transaction_date === today)
+      .filter((t) => t.category === "gastos" && t.transaction_date === todayBrt)
       .reduce((sum, t) => sum + Number(t.amount), 0);
     setTodaySpending(todayGastos);
   };
