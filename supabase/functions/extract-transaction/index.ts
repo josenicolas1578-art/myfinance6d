@@ -155,15 +155,20 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
     }
 
     // Insert transactions
-    const rows = transactions
-      .filter((t: any) => t.amount > 0)
-      .map((t: any) => ({
+    const rows = transactions.reduce((acc, t: any) => {
+      const amount = parseAmount(t.amount);
+      if (amount <= 0) return acc;
+
+      acc.push({
         user_id: user.id,
-        category: t.category || "gastos",
-        amount: t.amount,
-        description: t.description || null,
+        category: normalizeCategory(t.category),
+        amount,
+        description: typeof t.description === "string" ? t.description : null,
         transaction_date: new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
-      }));
+      });
+
+      return acc;
+    }, [] as { user_id: string; category: "gastos" | "investimentos" | "retornos"; amount: number; description: string | null; transaction_date: string }[]);
 
     if (rows.length > 0) {
       const { error: insertError } = await supabase.from("transactions").insert(rows);
