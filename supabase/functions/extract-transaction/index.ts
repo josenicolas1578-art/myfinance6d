@@ -127,10 +127,9 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
         for (const r of rows) {
           if (r.category === "retornos") {
             balanceChange += r.amount;
-          } else if (r.category === "gastos") {
+          } else if (r.category === "gastos" || r.category === "investimentos") {
             balanceChange -= r.amount;
           }
-          // "investimentos" não altera o saldo nem o limite de gastos
         }
 
         const { error: updateError } = await supabase
