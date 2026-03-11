@@ -177,7 +177,7 @@ const GraficosPage = () => {
         : new Date(now.getFullYear(), now.getMonth(), 1);
       const end = now;
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toISOString().split("T")[0]] = 0;
+        dateMap[d.toLocaleDateString("en-CA")] = 0;
       }
     }
 
