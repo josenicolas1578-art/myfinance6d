@@ -102,17 +102,20 @@ const GraficosPage = () => {
 
   const fetchTransactions = async () => {
     setLoading(true);
+    // Use local date (Brazil timezone) to match transaction_date stored in BRT
     const now = new Date();
+    const localDate = now.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
+    const localYear = now.getFullYear();
+    const localMonth = now.getMonth();
     let startDate: string;
 
     if (period === "hoje") {
-      startDate = now.toISOString().split("T")[0];
+      startDate = localDate;
     } else if (period === "7dias") {
-      const d = new Date(now);
-      d.setDate(d.getDate() - 6);
-      startDate = d.toISOString().split("T")[0];
+      const d = new Date(localYear, localMonth, now.getDate() - 6);
+      startDate = d.toLocaleDateString("en-CA");
     } else {
-      startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+      startDate = `${localYear}-${String(localMonth + 1).padStart(2, "0")}-01`;
     }
 
     const { data } = await supabase
@@ -127,7 +130,7 @@ const GraficosPage = () => {
     setLoading(false);
 
     // Check daily limit
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("en-CA");
     const todayGastos = txns
       .filter((t) => t.category === "gastos" && t.transaction_date === today)
       .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -166,7 +169,7 @@ const GraficosPage = () => {
     const dateMap: Record<string, number> = {};
 
     if (period === "hoje") {
-      const key = now.toISOString().split("T")[0];
+      const key = now.toLocaleDateString("en-CA");
       dateMap[key] = 0;
     } else {
       const start = period === "7dias"
@@ -174,7 +177,7 @@ const GraficosPage = () => {
         : new Date(now.getFullYear(), now.getMonth(), 1);
       const end = now;
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toISOString().split("T")[0]] = 0;
+        dateMap[d.toLocaleDateString("en-CA")] = 0;
       }
     }
 
@@ -218,14 +221,14 @@ const GraficosPage = () => {
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
     if (period === "hoje") {
-      const key = now.toISOString().split("T")[0];
+      const key = now.toLocaleDateString("en-CA");
       dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
     } else {
       const start = period === "7dias"
         ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
         : new Date(now.getFullYear(), now.getMonth(), 1);
       for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toISOString().split("T")[0]] = { gains: 0, expenses: 0, investments: 0 };
+        dateMap[d.toLocaleDateString("en-CA")] = { gains: 0, expenses: 0, investments: 0 };
       }
     }
 

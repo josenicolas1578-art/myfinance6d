@@ -64,24 +64,15 @@ serve(async (req) => {
         .lte("created_at", timeAfter);
 
       if (transactions && transactions.length > 0) {
-        // Reverse balance
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("current_balance")
-          .eq("user_id", user.id)
-          .single();
-
-        if (profile) {
-          let balanceChange = 0;
-          for (const t of transactions) {
-            if (t.category === "retornos") balanceChange -= t.amount;
-            else if (t.category === "gastos" || t.category === "investimentos") balanceChange += t.amount;
-          }
-
-          await supabase
-            .from("profiles")
-            .update({ current_balance: (profile.current_balance ?? 0) + balanceChange })
-            .eq("user_id", user.id);
+        // Reverse balance atomically
+        for (const t of transactions) {
+          // Reverse: if it was gastos/investimentos (subtracted), add back; if retornos (added), subtract
+          const reverseCategory = t.category === "retornos" ? "gastos" : "retornos";
+          await supabase.rpc("adjust_balance", {
+            _user_id: user.id,
+            _amount: t.amount,
+            _category: reverseCategory,
+          });
         }
 
         // Delete the transactions
