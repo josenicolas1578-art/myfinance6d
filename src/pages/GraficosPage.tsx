@@ -221,7 +221,7 @@ const GraficosPage = () => {
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
     if (period === "hoje") {
-      const key = now.toISOString().split("T")[0];
+      const key = now.toLocaleDateString("en-CA");
       dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
     } else {
       const start = period === "7dias"
