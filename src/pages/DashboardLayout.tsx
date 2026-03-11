@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import BottomNav from "@/components/BottomNav";
 import SideMenu, { type ChatTopic } from "@/components/SideMenu";
 import OnboardingTutorial from "@/components/OnboardingTutorial";
+import TransactionHistoryDialog from "@/components/TransactionHistoryDialog";
 import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -14,6 +15,7 @@ const DashboardLayout = () => {
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const [balanceHidden, setBalanceHidden] = useState(() => {
     return localStorage.getItem("myfinance_balance_hidden") === "true";
   });
@@ -74,18 +76,21 @@ const DashboardLayout = () => {
                   <Menu className="w-6 h-6" />
                 </button>
               )}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20">
+              <button
+                onClick={() => setHistoryOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
+              >
                 <Wallet className="w-3.5 h-3.5 text-primary" />
                 <span className="text-xs font-semibold text-primary">
                   {balanceHidden ? maskedBalance : balanceFormatted}
                 </span>
-                <button
-                  onClick={toggleBalanceVisibility}
-                  className="ml-1 text-primary/60 hover:text-primary transition-colors"
-                >
-                  {balanceHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-                </button>
-              </div>
+              </button>
+              <button
+                onClick={toggleBalanceVisibility}
+                className="text-primary/60 hover:text-primary transition-colors"
+              >
+                {balanceHidden ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+              </button>
             </div>
 
             {/* Mobile only - right side branding */}
@@ -154,6 +159,8 @@ const DashboardLayout = () => {
           {isChatPage ? <Outlet context={{ chatTopic }} /> : <Outlet />}
         </main>
       </div>
+
+      <TransactionHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
     </div>
   );
 };

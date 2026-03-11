@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import type { ChatTopic } from "@/components/SideMenu";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -22,11 +23,13 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 async function streamChat({
   messages,
   topic,
+  currentBalance,
   onDelta,
   onDone,
 }: {
   messages: Msg[];
   topic: string;
+  currentBalance?: number | null;
   onDelta: (text: string) => void;
   onDone: () => void;
 }) {
@@ -36,7 +39,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ messages, topic }),
+    body: JSON.stringify({ messages, topic, currentBalance }),
   });
 
   if (!resp.ok) {
@@ -86,6 +89,7 @@ const UNDO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/undo-last-ch
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
   const { user } = useAuth();
+  const { balance } = useRealtimeBalance();
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<string, Msg[]>>({
@@ -269,6 +273,7 @@ const ChatPage = () => {
       await streamChat({
         messages: allMessages,
         topic: isCustomAgent ? `custom:${topicLabel}` : "geral",
+        currentBalance: balance,
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);
