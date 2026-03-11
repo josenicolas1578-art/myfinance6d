@@ -52,6 +52,43 @@ const parseCurrency = (value: string) => {
   return parseFloat(cleaned) || null;
 };
 
+const BRAZIL_TZ = "America/Sao_Paulo";
+
+const getBrtDateString = (date: Date = new Date()) =>
+  date.toLocaleDateString("en-CA", { timeZone: BRAZIL_TZ });
+
+const parseIsoDate = (isoDate: string) => {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
+const formatIsoDate = (date: Date) => date.toISOString().slice(0, 10);
+
+const createPeriodDateMap = (currentDateIso: string, currentPeriod: Period) => {
+  const dateMap: Record<string, number> = {};
+  const endDate = parseIsoDate(currentDateIso);
+
+  if (currentPeriod === "hoje") {
+    dateMap[currentDateIso] = 0;
+    return dateMap;
+  }
+
+  const startDate =
+    currentPeriod === "7dias"
+      ? new Date(endDate)
+      : new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), 1));
+
+  if (currentPeriod === "7dias") {
+    startDate.setUTCDate(startDate.getUTCDate() - 6);
+  }
+
+  for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
+    dateMap[formatIsoDate(d)] = 0;
+  }
+
+  return dateMap;
+};
+
 const GraficosPage = () => {
   const { user } = useAuth();
   const [period, setPeriod] = useState<Period>("mes");
