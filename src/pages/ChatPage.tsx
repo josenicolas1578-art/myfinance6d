@@ -89,6 +89,7 @@ const UNDO_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/undo-last-ch
 const ChatPage = () => {
   const { chatTopic } = useOutletContext<{ chatTopic: ChatTopic }>();
   const { user } = useAuth();
+  const { balance } = useRealtimeBalance();
   const navigate = useNavigate();
   const [formCompleted, setFormCompleted] = useState<boolean | null>(null);
   const [conversations, setConversations] = useState<Record<string, Msg[]>>({
