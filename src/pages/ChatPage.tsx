@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import ReactMarkdown from "react-markdown";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useRealtimeBalance } from "@/hooks/useRealtimeBalance";
 import type { ChatTopic } from "@/components/SideMenu";
 
 type Msg = { role: "user" | "assistant"; content: string };
