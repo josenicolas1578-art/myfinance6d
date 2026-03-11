@@ -23,11 +23,13 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 async function streamChat({
   messages,
   topic,
+  currentBalance,
   onDelta,
   onDone,
 }: {
   messages: Msg[];
   topic: string;
+  currentBalance?: number | null;
   onDelta: (text: string) => void;
   onDone: () => void;
 }) {
