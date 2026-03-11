@@ -130,7 +130,7 @@ const GraficosPage = () => {
     setLoading(false);
 
     // Check daily limit
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date().toLocaleDateString("en-CA");
     const todayGastos = txns
       .filter((t) => t.category === "gastos" && t.transaction_date === today)
       .reduce((sum, t) => sum + Number(t.amount), 0);
