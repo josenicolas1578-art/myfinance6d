@@ -196,29 +196,13 @@ const GraficosPage = () => {
   };
 
   const buildChartData = (category: Category) => {
-    const now = new Date();
-    // Each category shows ONLY its own transactions - no mixing
+    const todayBrt = getBrtDateString();
     const filtered = transactions.filter((t) => t.category === category);
-    const dateMap: Record<string, number> = {};
-
-    if (period === "hoje") {
-      const key = now.toLocaleDateString("en-CA");
-      dateMap[key] = 0;
-    } else {
-      const start = period === "7dias"
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
-        : new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = now;
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toLocaleDateString("en-CA")] = 0;
-      }
-    }
+    const dateMap = createPeriodDateMap(todayBrt, period);
 
     filtered.forEach((t) => {
       if (dateMap[t.transaction_date] !== undefined) {
         dateMap[t.transaction_date] += Number(t.amount);
-      } else {
-        dateMap[t.transaction_date] = Number(t.amount);
       }
     });
 
@@ -250,24 +234,17 @@ const GraficosPage = () => {
   }, [detailCategory, transactions]);
 
   const generalChartData = useMemo(() => {
-    const now = new Date();
+    const todayBrt = getBrtDateString();
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
-    if (period === "hoje") {
-      const key = now.toLocaleDateString("en-CA");
-      dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
-    } else {
-      const start = period === "7dias"
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
-        : new Date(now.getFullYear(), now.getMonth(), 1);
-      for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toLocaleDateString("en-CA")] = { gains: 0, expenses: 0, investments: 0 };
-      }
-    }
+    Object.entries(createPeriodDateMap(todayBrt, period)).forEach(([date]) => {
+      dateMap[date] = { gains: 0, expenses: 0, investments: 0 };
+    });
 
     transactions.forEach((t) => {
       const key = t.transaction_date;
-      if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
+      if (!dateMap[key]) return;
+
       if (t.category === "retornos") {
         dateMap[key].gains += Number(t.amount);
       } else if (t.category === "gastos") {
@@ -277,17 +254,14 @@ const GraficosPage = () => {
       }
     });
 
-    // Build cumulative net line that shows investment dips in blue context
-    let cumulative = 0;
     return Object.entries(dateMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, { gains, expenses, investments }]) => {
         const dayNet = gains - expenses - investments;
-        cumulative += dayNet;
+
         return {
           date: date.slice(5).replace("-", "/"),
-          net: cumulative,
-          // Track dominant movement type for this day
+          net: dayNet,
           investmentDay: investments > 0 && investments >= expenses && investments >= gains,
           returnDay: gains > 0 && gains >= expenses && gains >= investments,
         };
