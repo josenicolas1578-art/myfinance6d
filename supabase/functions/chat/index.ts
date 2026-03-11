@@ -20,16 +20,20 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages, topic } = await req.json();
+    const { messages, topic, currentBalance } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const balanceInfo = currentBalance != null
+      ? `\n\nSaldo atual do usuário: R$ ${Number(currentBalance).toFixed(2).replace('.', ',')}`
+      : "";
 
     let systemPrompt: string;
     if (topic.startsWith("custom:")) {
       const agentName = topic.replace("custom:", "");
-      systemPrompt = `Você é ${agentName}, um gestor financeiro personalizado. Ajude o usuário com suas finanças de acordo com seu papel. Quando o usuário mencionar valores financeiros (gastos, investimentos, ganhos), registre e confirme. Seja direto e breve. Responda em português brasileiro.`;
+      systemPrompt = `Você é ${agentName}, um gestor financeiro personalizado. Ajude o usuário com suas finanças de acordo com seu papel. Quando o usuário mencionar valores financeiros (gastos, investimentos, ganhos), registre e confirme. Seja direto e breve. Responda em português brasileiro.${balanceInfo}`;
     } else {
-      systemPrompt = GENERAL_PROMPT;
+      systemPrompt = GENERAL_PROMPT + balanceInfo;
     }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
