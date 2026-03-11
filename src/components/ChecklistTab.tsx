@@ -50,7 +50,7 @@ const ChecklistTab = () => {
     if (error) {
       toast.error("Erro ao adicionar item");
     } else if (data) {
-      setItems([...items, data]);
+      setItems([data, ...items]);
       setNewItem("");
     }
   };
