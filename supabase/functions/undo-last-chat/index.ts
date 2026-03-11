@@ -75,7 +75,7 @@ serve(async (req) => {
           let balanceChange = 0;
           for (const t of transactions) {
             if (t.category === "retornos") balanceChange -= t.amount;
-            else if (t.category === "gastos") balanceChange += t.amount;
+            else if (t.category === "gastos" || t.category === "investimentos") balanceChange += t.amount;
           }
 
           await supabase
