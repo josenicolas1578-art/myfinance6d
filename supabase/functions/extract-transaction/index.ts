@@ -106,7 +106,7 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
         category: t.category || "gastos",
         amount: t.amount,
         description: t.description || null,
-        transaction_date: new Date().toISOString().split("T")[0],
+        transaction_date: new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
       }));
 
     if (rows.length > 0) {
