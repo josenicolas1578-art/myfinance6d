@@ -28,7 +28,7 @@ const ChecklistTab = () => {
     const { data, error } = await supabase
       .from("checklist_items")
       .select("*")
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: false });
 
     if (error) {
       toast.error("Erro ao carregar checklist");
@@ -50,7 +50,7 @@ const ChecklistTab = () => {
     if (error) {
       toast.error("Erro ao adicionar item");
     } else if (data) {
-      setItems([...items, data]);
+      setItems([data, ...items]);
       setNewItem("");
     }
   };

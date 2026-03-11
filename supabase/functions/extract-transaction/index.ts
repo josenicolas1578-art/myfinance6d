@@ -6,6 +6,58 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const normalizeCategory = (value: unknown): "gastos" | "investimentos" | "retornos" => {
+  const text = typeof value === "string" ? normalizeText(value) : "";
+
+  if (
+    text.includes("retorn") ||
+    text.includes("ganh") ||
+    text.includes("receb") ||
+    text.includes("salario") ||
+    text.includes("lucro") ||
+    text.includes("rendimento")
+  ) {
+    return "retornos";
+  }
+
+  if (
+    text.includes("invest") ||
+    text.includes("aport") ||
+    text.includes("aplique")
+  ) {
+    return "investimentos";
+  }
+
+  return "gastos";
+};
+
+const parseAmount = (value: unknown): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.abs(value) : 0;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(
+      value
+        .replace(/\s/g, "")
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .replace(/[^\d.-]/g, "")
+    );
+
+    return Number.isFinite(parsed) ? Math.abs(parsed) : 0;
+  }
+
+  return 0;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -81,10 +133,14 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
       rawContent = arrayMatch[0];
     }
 
-    let transactions: { amount: number; description: string; category: string }[] = [];
+    let transactions: { amount: number | string; description: string; category: string }[] = [];
     try {
       const parsed = JSON.parse(rawContent);
-      transactions = Array.isArray(parsed) ? parsed : [];
+      transactions = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.transactions)
+          ? parsed.transactions
+          : [];
     } catch {
       console.error("Failed to parse AI response:", rawContent);
       return new Response(JSON.stringify({ transactions: [] }), {
@@ -99,15 +155,20 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
     }
 
     // Insert transactions
-    const rows = transactions
-      .filter((t: any) => t.amount > 0)
-      .map((t: any) => ({
+    const rows = transactions.reduce((acc, t: any) => {
+      const amount = parseAmount(t.amount);
+      if (amount <= 0) return acc;
+
+      acc.push({
         user_id: user.id,
-        category: t.category || "gastos",
-        amount: t.amount,
-        description: t.description || null,
+        category: normalizeCategory(t.category),
+        amount,
+        description: typeof t.description === "string" ? t.description : null,
         transaction_date: new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" }),
-      }));
+      });
+
+      return acc;
+    }, [] as { user_id: string; category: "gastos" | "investimentos" | "retornos"; amount: number; description: string | null; transaction_date: string }[]);
 
     if (rows.length > 0) {
       const { error: insertError } = await supabase.from("transactions").insert(rows);

@@ -52,6 +52,43 @@ const parseCurrency = (value: string) => {
   return parseFloat(cleaned) || null;
 };
 
+const BRAZIL_TZ = "America/Sao_Paulo";
+
+const getBrtDateString = (date: Date = new Date()) =>
+  date.toLocaleDateString("en-CA", { timeZone: BRAZIL_TZ });
+
+const parseIsoDate = (isoDate: string) => {
+  const [year, month, day] = isoDate.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day));
+};
+
+const formatIsoDate = (date: Date) => date.toISOString().slice(0, 10);
+
+const createPeriodDateMap = (currentDateIso: string, currentPeriod: Period) => {
+  const dateMap: Record<string, number> = {};
+  const endDate = parseIsoDate(currentDateIso);
+
+  if (currentPeriod === "hoje") {
+    dateMap[currentDateIso] = 0;
+    return dateMap;
+  }
+
+  const startDate =
+    currentPeriod === "7dias"
+      ? new Date(endDate)
+      : new Date(Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), 1));
+
+  if (currentPeriod === "7dias") {
+    startDate.setUTCDate(startDate.getUTCDate() - 6);
+  }
+
+  for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
+    dateMap[formatIsoDate(d)] = 0;
+  }
+
+  return dateMap;
+};
+
 const GraficosPage = () => {
   const { user } = useAuth();
   const [period, setPeriod] = useState<Period>("mes");
@@ -67,12 +104,26 @@ const GraficosPage = () => {
   const [limitExceededOpen, setLimitExceededOpen] = useState(false);
   const [todaySpending, setTodaySpending] = useState(0);
 
+  const [currentBrtDate, setCurrentBrtDate] = useState(getBrtDateString());
+
   useEffect(() => {
-    if (user) {
-      fetchTransactions();
-      fetchDailyLimit();
-    }
-  }, [user, period]);
+    if (user) fetchTransactions();
+  }, [user, period, currentBrtDate]);
+
+  useEffect(() => {
+    if (user) fetchDailyLimit();
+  }, [user]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBrtDate((prev) => {
+        const next = getBrtDateString();
+        return prev === next ? prev : next;
+      });
+    }, 30_000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Realtime subscription for transactions
   useEffect(() => {
@@ -102,20 +153,17 @@ const GraficosPage = () => {
 
   const fetchTransactions = async () => {
     setLoading(true);
-    // Use local date (Brazil timezone) to match transaction_date stored in BRT
-    const now = new Date();
-    const localDate = now.toLocaleDateString("en-CA"); // YYYY-MM-DD in local timezone
-    const localYear = now.getFullYear();
-    const localMonth = now.getMonth();
-    let startDate: string;
 
-    if (period === "hoje") {
-      startDate = localDate;
-    } else if (period === "7dias") {
-      const d = new Date(localYear, localMonth, now.getDate() - 6);
-      startDate = d.toLocaleDateString("en-CA");
-    } else {
-      startDate = `${localYear}-${String(localMonth + 1).padStart(2, "0")}-01`;
+    const todayBrt = getBrtDateString();
+    const todayDate = parseIsoDate(todayBrt);
+
+    let startDate = todayBrt;
+    if (period === "7dias") {
+      const start = new Date(todayDate);
+      start.setUTCDate(start.getUTCDate() - 6);
+      startDate = formatIsoDate(start);
+    } else if (period === "mes") {
+      startDate = `${todayBrt.slice(0, 7)}-01`;
     }
 
     const { data } = await supabase
@@ -129,10 +177,9 @@ const GraficosPage = () => {
     setTransactions(txns);
     setLoading(false);
 
-    // Check daily limit
-    const today = new Date().toLocaleDateString("en-CA");
+    // Check daily limit using BRT date (same timezone as transaction_date)
     const todayGastos = txns
-      .filter((t) => t.category === "gastos" && t.transaction_date === today)
+      .filter((t) => t.category === "gastos" && t.transaction_date === todayBrt)
       .reduce((sum, t) => sum + Number(t.amount), 0);
     setTodaySpending(todayGastos);
   };
@@ -163,29 +210,13 @@ const GraficosPage = () => {
   };
 
   const buildChartData = (category: Category) => {
-    const now = new Date();
-    // Each category shows ONLY its own transactions - no mixing
+    const todayBrt = getBrtDateString();
     const filtered = transactions.filter((t) => t.category === category);
-    const dateMap: Record<string, number> = {};
-
-    if (period === "hoje") {
-      const key = now.toLocaleDateString("en-CA");
-      dateMap[key] = 0;
-    } else {
-      const start = period === "7dias"
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
-        : new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = now;
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toLocaleDateString("en-CA")] = 0;
-      }
-    }
+    const dateMap = createPeriodDateMap(todayBrt, period);
 
     filtered.forEach((t) => {
       if (dateMap[t.transaction_date] !== undefined) {
         dateMap[t.transaction_date] += Number(t.amount);
-      } else {
-        dateMap[t.transaction_date] = Number(t.amount);
       }
     });
 
@@ -217,24 +248,17 @@ const GraficosPage = () => {
   }, [detailCategory, transactions]);
 
   const generalChartData = useMemo(() => {
-    const now = new Date();
+    const todayBrt = getBrtDateString();
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
-    if (period === "hoje") {
-      const key = now.toLocaleDateString("en-CA");
-      dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
-    } else {
-      const start = period === "7dias"
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
-        : new Date(now.getFullYear(), now.getMonth(), 1);
-      for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toLocaleDateString("en-CA")] = { gains: 0, expenses: 0, investments: 0 };
-      }
-    }
+    Object.entries(createPeriodDateMap(todayBrt, period)).forEach(([date]) => {
+      dateMap[date] = { gains: 0, expenses: 0, investments: 0 };
+    });
 
     transactions.forEach((t) => {
       const key = t.transaction_date;
-      if (!dateMap[key]) dateMap[key] = { gains: 0, expenses: 0, investments: 0 };
+      if (!dateMap[key]) return;
+
       if (t.category === "retornos") {
         dateMap[key].gains += Number(t.amount);
       } else if (t.category === "gastos") {
@@ -244,17 +268,14 @@ const GraficosPage = () => {
       }
     });
 
-    // Build cumulative net line that shows investment dips in blue context
-    let cumulative = 0;
     return Object.entries(dateMap)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([date, { gains, expenses, investments }]) => {
         const dayNet = gains - expenses - investments;
-        cumulative += dayNet;
+
         return {
           date: date.slice(5).replace("-", "/"),
-          net: cumulative,
-          // Track dominant movement type for this day
+          net: dayNet,
           investmentDay: investments > 0 && investments >= expenses && investments >= gains,
           returnDay: gains > 0 && gains >= expenses && gains >= investments,
         };
