@@ -104,12 +104,26 @@ const GraficosPage = () => {
   const [limitExceededOpen, setLimitExceededOpen] = useState(false);
   const [todaySpending, setTodaySpending] = useState(0);
 
+  const [currentBrtDate, setCurrentBrtDate] = useState(getBrtDateString());
+
   useEffect(() => {
-    if (user) {
-      fetchTransactions();
-      fetchDailyLimit();
-    }
-  }, [user, period]);
+    if (user) fetchTransactions();
+  }, [user, period, currentBrtDate]);
+
+  useEffect(() => {
+    if (user) fetchDailyLimit();
+  }, [user]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentBrtDate((prev) => {
+        const next = getBrtDateString();
+        return prev === next ? prev : next;
+      });
+    }, 30_000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Realtime subscription for transactions
   useEffect(() => {
