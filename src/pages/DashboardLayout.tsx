@@ -159,6 +159,8 @@ const DashboardLayout = () => {
           {isChatPage ? <Outlet context={{ chatTopic }} /> : <Outlet />}
         </main>
       </div>
+
+      <TransactionHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} />
     </div>
   );
 };
