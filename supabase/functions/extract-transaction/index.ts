@@ -6,6 +6,58 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const normalizeText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+const normalizeCategory = (value: unknown): "gastos" | "investimentos" | "retornos" => {
+  const text = typeof value === "string" ? normalizeText(value) : "";
+
+  if (
+    text.includes("retorn") ||
+    text.includes("ganh") ||
+    text.includes("receb") ||
+    text.includes("salario") ||
+    text.includes("lucro") ||
+    text.includes("rendimento")
+  ) {
+    return "retornos";
+  }
+
+  if (
+    text.includes("invest") ||
+    text.includes("aport") ||
+    text.includes("aplique")
+  ) {
+    return "investimentos";
+  }
+
+  return "gastos";
+};
+
+const parseAmount = (value: unknown): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? Math.abs(value) : 0;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(
+      value
+        .replace(/\s/g, "")
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .replace(/[^\d.-]/g, "")
+    );
+
+    return Number.isFinite(parsed) ? Math.abs(parsed) : 0;
+  }
+
+  return 0;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
