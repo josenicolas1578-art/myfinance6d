@@ -228,7 +228,7 @@ const GraficosPage = () => {
         ? new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6)
         : new Date(now.getFullYear(), now.getMonth(), 1);
       for (let d = new Date(start); d <= now; d.setDate(d.getDate() + 1)) {
-        dateMap[d.toISOString().split("T")[0]] = { gains: 0, expenses: 0, investments: 0 };
+        dateMap[d.toLocaleDateString("en-CA")] = { gains: 0, expenses: 0, investments: 0 };
       }
     }
 
