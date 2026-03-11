@@ -273,6 +273,7 @@ const ChatPage = () => {
       await streamChat({
         messages: allMessages,
         topic: isCustomAgent ? `custom:${topicLabel}` : "geral",
+        currentBalance: balance,
         onDelta: upsertAssistant,
         onDone: () => {
           setIsLoading(false);
