@@ -169,7 +169,7 @@ const GraficosPage = () => {
     const dateMap: Record<string, number> = {};
 
     if (period === "hoje") {
-      const key = now.toISOString().split("T")[0];
+      const key = now.toLocaleDateString("en-CA");
       dateMap[key] = 0;
     } else {
       const start = period === "7dias"
