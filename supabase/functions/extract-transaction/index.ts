@@ -133,10 +133,14 @@ Extraia as transações da mensagem do USUÁRIO. Retorne APENAS o array JSON.`;
       rawContent = arrayMatch[0];
     }
 
-    let transactions: { amount: number; description: string; category: string }[] = [];
+    let transactions: { amount: number | string; description: string; category: string }[] = [];
     try {
       const parsed = JSON.parse(rawContent);
-      transactions = Array.isArray(parsed) ? parsed : [];
+      transactions = Array.isArray(parsed)
+        ? parsed
+        : Array.isArray(parsed?.transactions)
+          ? parsed.transactions
+          : [];
     } catch {
       console.error("Failed to parse AI response:", rawContent);
       return new Response(JSON.stringify({ transactions: [] }), {
