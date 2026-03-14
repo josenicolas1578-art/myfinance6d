@@ -491,8 +491,8 @@ const GraficosPage = () => {
                     }}
                     labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                   />
-                  <Area
-                    type="monotone"
+                    <Area
+                      type="linear"
                     dataKey="net"
                     stroke={(() => {
                       const lastPoint = generalChartData[generalChartData.length - 1];
