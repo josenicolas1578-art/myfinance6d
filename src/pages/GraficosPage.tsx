@@ -319,7 +319,7 @@ const GraficosPage = () => {
           returnDay: gains > 0 && gains >= expenses && gains >= investments,
         };
       });
-  }, [transactions, period]);
+  }, [transactions, period, currentBrtDate]);
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5 max-w-lg lg:max-w-3xl mx-auto">
