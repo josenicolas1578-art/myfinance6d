@@ -249,7 +249,7 @@ const GraficosPage = () => {
   };
 
   const buildChartData = (category: Category) => {
-    const todayBrt = getBrtDateString();
+    const todayBrt = currentBrtDate;
     const filtered = transactions.filter((t) => t.category === category);
     const dateMap = createPeriodDateMap(todayBrt, period);
 
