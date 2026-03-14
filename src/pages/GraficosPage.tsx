@@ -54,12 +54,40 @@ const parseCurrency = (value: string) => {
 
 const BRAZIL_TZ = "America/Sao_Paulo";
 
-const getBrtDateString = (date: Date = new Date()) =>
-  date.toLocaleDateString("en-CA", { timeZone: BRAZIL_TZ });
+const brtFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: BRAZIL_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const getBrtDateString = (date: Date = new Date()) => {
+  const parts = brtFormatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  if (!year || !month || !day) {
+    return date.toISOString().slice(0, 10);
+  }
+
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeIsoDate = (value: string) => {
+  const normalized = value.trim().slice(0, 10);
+  return ISO_DATE_PATTERN.test(normalized) ? normalized : null;
+};
 
 const parseIsoDate = (isoDate: string) => {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
+  const normalized = normalizeIsoDate(isoDate);
+  if (!normalized) {
+    return new Date(`${getBrtDateString()}T00:00:00.000Z`);
+  }
+
+  return new Date(`${normalized}T00:00:00.000Z`);
 };
 
 const formatIsoDate = (date: Date) => date.toISOString().slice(0, 10);
