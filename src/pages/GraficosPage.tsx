@@ -287,7 +287,7 @@ const GraficosPage = () => {
   }, [detailCategory, transactions]);
 
   const generalChartData = useMemo(() => {
-    const todayBrt = getBrtDateString();
+    const todayBrt = currentBrtDate;
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
     Object.entries(createPeriodDateMap(todayBrt, period)).forEach(([date]) => {
