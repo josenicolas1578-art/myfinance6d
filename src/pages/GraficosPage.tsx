@@ -201,7 +201,18 @@ const GraficosPage = () => {
       .gte("transaction_date", startDate)
       .order("transaction_date", { ascending: true });
 
-    const txns = (data as Transaction[]) || [];
+    const txns = ((data as Transaction[]) || [])
+      .map((txn) => {
+        const normalizedDate = normalizeIsoDate(txn.transaction_date);
+        if (!normalizedDate) return null;
+
+        return {
+          ...txn,
+          transaction_date: normalizedDate,
+        };
+      })
+      .filter((txn): txn is Transaction => txn !== null);
+
     setTransactions(txns);
     setLoading(false);
 
