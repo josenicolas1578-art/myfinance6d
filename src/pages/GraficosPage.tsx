@@ -54,12 +54,40 @@ const parseCurrency = (value: string) => {
 
 const BRAZIL_TZ = "America/Sao_Paulo";
 
-const getBrtDateString = (date: Date = new Date()) =>
-  date.toLocaleDateString("en-CA", { timeZone: BRAZIL_TZ });
+const brtFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: BRAZIL_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+const getBrtDateString = (date: Date = new Date()) => {
+  const parts = brtFormatter.formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  if (!year || !month || !day) {
+    return date.toISOString().slice(0, 10);
+  }
+
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeIsoDate = (value: string) => {
+  const normalized = value.trim().slice(0, 10);
+  return ISO_DATE_PATTERN.test(normalized) ? normalized : null;
+};
 
 const parseIsoDate = (isoDate: string) => {
-  const [year, month, day] = isoDate.split("-").map(Number);
-  return new Date(Date.UTC(year, month - 1, day));
+  const normalized = normalizeIsoDate(isoDate);
+  if (!normalized) {
+    return new Date(`${getBrtDateString()}T00:00:00.000Z`);
+  }
+
+  return new Date(`${normalized}T00:00:00.000Z`);
 };
 
 const formatIsoDate = (date: Date) => date.toISOString().slice(0, 10);
@@ -173,7 +201,18 @@ const GraficosPage = () => {
       .gte("transaction_date", startDate)
       .order("transaction_date", { ascending: true });
 
-    const txns = (data as Transaction[]) || [];
+    const txns = ((data as Transaction[]) || [])
+      .map((txn) => {
+        const normalizedDate = normalizeIsoDate(txn.transaction_date);
+        if (!normalizedDate) return null;
+
+        return {
+          ...txn,
+          transaction_date: normalizedDate,
+        };
+      })
+      .filter((txn): txn is Transaction => txn !== null);
+
     setTransactions(txns);
     setLoading(false);
 
@@ -210,7 +249,7 @@ const GraficosPage = () => {
   };
 
   const buildChartData = (category: Category) => {
-    const todayBrt = getBrtDateString();
+    const todayBrt = currentBrtDate;
     const filtered = transactions.filter((t) => t.category === category);
     const dateMap = createPeriodDateMap(todayBrt, period);
 
@@ -248,7 +287,7 @@ const GraficosPage = () => {
   }, [detailCategory, transactions]);
 
   const generalChartData = useMemo(() => {
-    const todayBrt = getBrtDateString();
+    const todayBrt = currentBrtDate;
     const dateMap: Record<string, { gains: number; expenses: number; investments: number }> = {};
 
     Object.entries(createPeriodDateMap(todayBrt, period)).forEach(([date]) => {
@@ -280,7 +319,7 @@ const GraficosPage = () => {
           returnDay: gains > 0 && gains >= expenses && gains >= investments,
         };
       });
-  }, [transactions, period]);
+  }, [transactions, period, currentBrtDate]);
 
   return (
     <div className="flex flex-col gap-5 px-4 py-5 max-w-lg lg:max-w-3xl mx-auto">
@@ -452,8 +491,8 @@ const GraficosPage = () => {
                     }}
                     labelStyle={{ color: "hsl(var(--muted-foreground))" }}
                   />
-                  <Area
-                    type="monotone"
+                    <Area
+                      type="linear"
                     dataKey="net"
                     stroke={(() => {
                       const lastPoint = generalChartData[generalChartData.length - 1];
